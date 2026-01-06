@@ -161,16 +161,6 @@ const Login = ({ onLogin }) => {
           <p>Email: demo@prabastore.com</p>
           <p>Password: demo123</p>
           
-          <div className="debug-section">
-            <h4>Debug Info:</h4>
-            <button 
-              type="button" 
-              className="debug-btn"
-              onClick={() => window.testFirebaseAuth?.()}
-            >
-              Test Firebase Connection
-            </button>
-          </div>
         </div>
       </div>
     </div>
