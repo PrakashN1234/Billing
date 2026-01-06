@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import Login from './components/Login';
 import Header from './components/Header';
 import BillingTable from './components/BillingTable';
 import InventorySidebar from './components/InventorySidebar';
@@ -8,7 +10,8 @@ import { initializeInventory } from './utils/initializeData';
 import './utils/testConnection'; // This makes testFirebaseConnection available globally
 import './App.css';
 
-const App = () => {
+const MainApp = () => {
+  const { currentUser } = useAuth();
   const [inventory, setInventory] = useState([]);
   const [cart, setCart] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -16,6 +19,8 @@ const App = () => {
   const [isInitializing, setIsInitializing] = useState(false);
 
   useEffect(() => {
+    if (!currentUser) return;
+    
     let unsubscribe;
     
     const setupInventory = async () => {
@@ -56,7 +61,7 @@ const App = () => {
     return () => {
       if (unsubscribe) unsubscribe();
     };
-  }, [isInitializing]);
+  }, [isInitializing, currentUser]);
 
   const addToCart = (product) => {
     if (product.stock <= 0) {
@@ -95,6 +100,11 @@ const App = () => {
   const removeItem = (id) => setCart(cart.filter(item => item.id !== id));
 
   const clearCart = () => setCart([]);
+
+  // Show login if user is not authenticated
+  if (!currentUser) {
+    return <Login />;
+  }
 
   if (loading || isInitializing) {
     return (
@@ -136,6 +146,14 @@ const App = () => {
         />
       </main>
     </div>
+  );
+};
+
+const App = () => {
+  return (
+    <AuthProvider>
+      <MainApp />
+    </AuthProvider>
   );
 };
 
