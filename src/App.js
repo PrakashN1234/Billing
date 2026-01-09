@@ -1,13 +1,17 @@
 import { useState, useEffect } from 'react';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Login from './components/Login';
-import Header from './components/Header';
+import Sidebar from './components/Sidebar';
+import Dashboard from './components/Dashboard';
+import StoresView from './components/StoresView';
+import UsersView from './components/UsersView';
 import BillingTable from './components/BillingTable';
 import InventorySidebar from './components/InventorySidebar';
+import AdminPanel from './components/AdminPanel';
 import LoadingSpinner from './components/LoadingSpinner';
 import { subscribeToInventory } from './services/firebaseService';
 import { initializeInventory } from './utils/initializeData';
-import './utils/testConnection'; // This makes testFirebaseConnection available globally
+import './utils/testConnection';
 import './App.css';
 
 const MainApp = () => {
@@ -17,6 +21,7 @@ const MainApp = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isInitializing, setIsInitializing] = useState(false);
+  const [activeView, setActiveView] = useState('dashboard');
 
   useEffect(() => {
     if (!currentUser) return;
@@ -24,10 +29,8 @@ const MainApp = () => {
     let unsubscribe;
     
     const setupInventory = async () => {
-      // Subscribe to real-time inventory updates
       unsubscribe = subscribeToInventory(
         (inventoryData) => {
-          // If inventory is empty, auto-initialize with sample data
           if (inventoryData.length === 0 && !isInitializing) {
             setIsInitializing(true);
             initializeInventory()
@@ -57,7 +60,6 @@ const MainApp = () => {
 
     setupInventory();
 
-    // Cleanup subscription on unmount
     return () => {
       if (unsubscribe) unsubscribe();
     };
@@ -98,10 +100,8 @@ const MainApp = () => {
   };
 
   const removeItem = (id) => setCart(cart.filter(item => item.id !== id));
-
   const clearCart = () => setCart([]);
 
-  // Show login if user is not authenticated
   if (!currentUser) {
     return <Login />;
   }
@@ -109,7 +109,7 @@ const MainApp = () => {
   if (loading || isInitializing) {
     return (
       <LoadingSpinner 
-        message={isInitializing ? "Setting up inventory..." : "Loading Praba Store..."} 
+        message={isInitializing ? "Setting up inventory..." : "Loading SuperMarket..."} 
       />
     );
   }
@@ -129,21 +129,48 @@ const MainApp = () => {
     );
   }
 
+  const renderActiveView = () => {
+    switch (activeView) {
+      case 'dashboard':
+        return <Dashboard inventory={inventory} currentUser={currentUser} />;
+      case 'stores':
+        return <StoresView />;
+      case 'users':
+        return <UsersView />;
+      case 'inventory':
+        return <AdminPanel inventory={inventory} onClose={() => setActiveView('dashboard')} />;
+      case 'billing':
+        return (
+          <div className="billing-layout">
+            <BillingTable 
+              cart={cart} 
+              inventory={inventory}
+              updateQty={updateQty} 
+              removeItem={removeItem} 
+              clearCart={clearCart} 
+            />
+            <InventorySidebar 
+              inventory={inventory} 
+              addToCart={addToCart} 
+            />
+          </div>
+        );
+      case 'reports':
+        return <div className="coming-soon">Reports coming soon...</div>;
+      case 'lowstock':
+        return <div className="coming-soon">Low Stock alerts coming soon...</div>;
+      case 'activity':
+        return <div className="coming-soon">Activity Log coming soon...</div>;
+      default:
+        return <Dashboard inventory={inventory} currentUser={currentUser} />;
+    }
+  };
+
   return (
     <div className="app-container">
-      <Header inventory={inventory} />
-      <main className="main-layout">
-        <BillingTable 
-          cart={cart} 
-          inventory={inventory}
-          updateQty={updateQty} 
-          removeItem={removeItem} 
-          clearCart={clearCart} 
-        />
-        <InventorySidebar 
-          inventory={inventory} 
-          addToCart={addToCart} 
-        />
+      <Sidebar activeView={activeView} setActiveView={setActiveView} />
+      <main className="main-content">
+        {renderActiveView()}
       </main>
     </div>
   );
