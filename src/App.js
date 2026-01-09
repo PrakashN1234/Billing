@@ -5,6 +5,9 @@ import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
 import StoresView from './components/StoresView';
 import UsersView from './components/UsersView';
+import ReportsView from './components/ReportsView';
+import LowStockView from './components/LowStockView';
+import ActivityView from './components/ActivityView';
 import BillingTable from './components/BillingTable';
 import InventorySidebar from './components/InventorySidebar';
 import AdminPanel from './components/AdminPanel';
@@ -109,7 +112,7 @@ const MainApp = () => {
   if (loading || isInitializing) {
     return (
       <LoadingSpinner 
-        message={isInitializing ? "Setting up inventory..." : "Loading SuperMarket..."} 
+        message={isInitializing ? "Setting up inventory..." : "Loading My Store..."} 
       />
     );
   }
@@ -156,11 +159,11 @@ const MainApp = () => {
           </div>
         );
       case 'reports':
-        return <div className="coming-soon">Reports coming soon...</div>;
+        return <ReportsView inventory={inventory} />;
       case 'lowstock':
-        return <div className="coming-soon">Low Stock alerts coming soon...</div>;
+        return <LowStockView inventory={inventory} />;
       case 'activity':
-        return <div className="coming-soon">Activity Log coming soon...</div>;
+        return <ActivityView inventory={inventory} />;
       default:
         return <Dashboard inventory={inventory} currentUser={currentUser} />;
     }

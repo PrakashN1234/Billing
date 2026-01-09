@@ -5,12 +5,12 @@ const StoresView = () => {
   const [stores] = useState([
     {
       id: 1,
-      name: 'Praba Store Main Branch',
+      name: 'My Store Main Branch',
       address: '123 Main Street, City Center',
       phone: '+91 9876543210',
-      email: 'main@prabastore.com',
+      email: 'main@mystore.com',
       status: 'Active',
-      manager: 'John Doe'
+      manager: 'Store Manager'
     }
   ]);
 

@@ -39,7 +39,7 @@ const Sidebar = ({ activeView, setActiveView }) => {
       <div className="sidebar-header">
         <div className="logo">
           <Store size={24} />
-          <span>SuperMarket</span>
+          <span>My Store</span>
         </div>
       </div>
 

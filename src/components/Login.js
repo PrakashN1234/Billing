@@ -84,7 +84,7 @@ const Login = ({ onLogin }) => {
     setLoading(true);
     setError('');
     try {
-      await signInWithEmailAndPassword(auth, 'demo@prabastore.com', 'demo123');
+      await signInWithEmailAndPassword(auth, 'demo@mystore.com', 'demo123');
       onLogin();
     } catch (error) {
       setError('Demo login failed. Please use manual login.');
@@ -98,7 +98,7 @@ const Login = ({ onLogin }) => {
       <div className="login-card">
         <div className="login-header">
           <Store size={40} className="store-icon" />
-          <h1>Praba Store</h1>
+          <h1>My Store</h1>
           <p>Supermarket Billing System</p>
         </div>
 
@@ -158,7 +158,7 @@ const Login = ({ onLogin }) => {
 
         <div className="demo-credentials">
           <h4>Demo Credentials:</h4>
-          <p>Email: demo@prabastore.com</p>
+          <p>Email: demo@mystore.com</p>
           <p>Password: demo123</p>
           
         </div>

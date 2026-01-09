@@ -6,7 +6,7 @@ const UsersView = () => {
     {
       id: 1,
       name: 'Admin User',
-      email: 'admin@prabastore.com',
+      email: 'admin@mystore.com',
       phone: '+91 9876543210',
       role: 'Administrator',
       status: 'Active',
@@ -16,7 +16,7 @@ const UsersView = () => {
     {
       id: 2,
       name: 'Demo User',
-      email: 'demo@prabastore.com',
+      email: 'demo@mystore.com',
       phone: '+91 9876543211',
       role: 'Cashier',
       status: 'Active',

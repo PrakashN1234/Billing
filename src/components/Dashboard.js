@@ -71,6 +71,7 @@ const Dashboard = ({ inventory, currentUser }) => {
           <div className="user-info">
             <span className="user-name">admin</span>
             <span className="user-role">Admin</span>
+            <span className="user-email">admin@mystore.com</span>
           </div>
           <button className="logout-btn">Logout</button>
         </div>
