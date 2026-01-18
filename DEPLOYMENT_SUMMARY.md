@@ -19,17 +19,18 @@ When a new user logs in to the system:
 ### 2. GitHub Deployment
 **Status:** ✅ Deployed
 
-**Repository:** https://github.com/PrakashN1234/Store-Billing.git
+**Repository:** https://github.com/PrakashN1234/Billing-System.git
 **Deployment:** GitHub Pages
 
 **Deployment Steps Completed:**
-1. ✅ Committed all changes to main branch
-2. ✅ Pushed to GitHub repository
-3. ✅ Built production bundle (191.23 kB main.js, 12.4 kB CSS)
-4. ✅ Deployed to GitHub Pages using `gh-pages` package
+1. ✅ Updated remote origin to new repository
+2. ✅ Committed all changes to main branch
+3. ✅ Pushed to new GitHub repository (Billing-System)
+4. ✅ Built production bundle (191.23 kB main.js, 12.4 kB CSS)
+5. ✅ Deployed to GitHub Pages using `gh-pages` package
 
 **Access URL:** 
-- The site will be available at: `https://prakashn1234.github.io/Store-Billing/`
+- The site will be available at: `https://prakashn1234.github.io/Billing-System/`
 - May take 5-10 minutes for GitHub Pages to fully deploy
 
 ### 3. Responsive Design
@@ -214,6 +215,6 @@ The application is production-ready and accessible via GitHub Pages!
 
 ---
 
-**Deployed:** January 14, 2026
+**Deployed:** January 18, 2026
 **Version:** 0.1.0
-**Repository:** https://github.com/PrakashN1234/Store-Billing.git
+**Repository:** https://github.com/PrakashN1234/Billing-System.git
