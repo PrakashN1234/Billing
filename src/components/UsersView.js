@@ -62,11 +62,11 @@ const UsersView = () => {
 
   const handleEditUser = (user) => {
     setFormData({
-      name: user.name,
-      email: user.email,
-      phone: user.phone,
-      role: user.role,
-      status: user.status,
+      name: user.name || '',
+      email: user.email || '',
+      phone: user.phone || '',
+      role: user.role || 'Cashier',
+      status: user.status || 'Active',
       password: user.password || ''
     });
     setEditingUser(user.id);
@@ -75,12 +75,17 @@ const UsersView = () => {
 
   const handleDeleteUser = async (userId) => {
     const user = users.find(u => u.id === userId);
-    if (user && user.role === 'Administrator' && users.filter(u => u.role === 'Administrator').length === 1) {
+    if (!user) {
+      alert('User not found!');
+      return;
+    }
+    
+    if (user.role === 'Administrator' && users.filter(u => u.role === 'Administrator').length === 1) {
       alert('Cannot delete the last administrator user!');
       return;
     }
 
-    if (window.confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+    if (window.confirm(`Are you sure you want to delete ${user.name || 'this user'}? This action cannot be undone.`)) {
       try {
         await deleteUser(userId);
         alert('User deleted successfully!');
@@ -173,8 +178,12 @@ const UsersView = () => {
   };
 
   const formatDate = (dateString) => {
-    if (dateString === 'Never') return 'Never';
-    return new Date(dateString).toLocaleDateString();
+    if (!dateString || dateString === 'Never' || dateString === 'Unknown') return 'Never';
+    try {
+      return new Date(dateString).toLocaleDateString();
+    } catch (error) {
+      return 'Invalid Date';
+    }
   };
 
   if (loading) {
@@ -212,16 +221,16 @@ const UsersView = () => {
             </tr>
           </thead>
           <tbody>
-            {users.map((user) => (
-              <tr key={user.id}>
+            {users && users.length > 0 ? users.map((user) => (
+              <tr key={user.id || Math.random()}>
                 <td>
                   <div className="user-info">
                     <div className="user-avatar">
-                      {user.name.charAt(0)}
+                      {user.name ? user.name.charAt(0).toUpperCase() : '?'}
                     </div>
                     <div>
-                      <div className="user-name">{user.name}</div>
-                      <div className="user-email">{user.email}</div>
+                      <div className="user-name">{user.name || 'Unknown User'}</div>
+                      <div className="user-email">{user.email || 'No email'}</div>
                     </div>
                   </div>
                 </td>
@@ -229,33 +238,33 @@ const UsersView = () => {
                   <div className="contact-info">
                     <div className="contact-item">
                       <Mail size={14} />
-                      <span>{user.email}</span>
+                      <span>{user.email || 'No email'}</span>
                     </div>
                     <div className="contact-item">
                       <Phone size={14} />
-                      <span>{user.phone}</span>
+                      <span>{user.phone || 'No phone'}</span>
                     </div>
                   </div>
                 </td>
                 <td>
-                  <span className={`role-badge ${getRoleColor(user.role)}`}>
-                    {user.role}
+                  <span className={`role-badge ${getRoleColor(user.role || 'user')}`}>
+                    {user.role || 'User'}
                   </span>
                 </td>
                 <td>
-                  <span className={`status-badge ${user.status.toLowerCase()}`}>
-                    {user.status}
+                  <span className={`status-badge ${(user.status || 'active').toLowerCase()}`}>
+                    {user.status || 'Active'}
                   </span>
                 </td>
                 <td>
                   <div className="date-info">
                     <Calendar size={14} />
-                    <span>{formatDate(user.joinDate)}</span>
+                    <span>{formatDate(user.joinDate || 'Unknown')}</span>
                   </div>
                 </td>
                 <td>
                   <span className="last-login">
-                    {formatDate(user.lastLogin)}
+                    {formatDate(user.lastLogin || 'Never')}
                   </span>
                 </td>
                 <td>
@@ -277,7 +286,20 @@ const UsersView = () => {
                   </div>
                 </td>
               </tr>
-            ))}
+            )) : (
+              <tr>
+                <td colSpan="7" className="no-data">
+                  <div className="empty-state">
+                    <Users size={48} />
+                    <p>No users found</p>
+                    <button className="btn-primary" onClick={handleAddUser}>
+                      <Plus size={16} />
+                      Add First User
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
