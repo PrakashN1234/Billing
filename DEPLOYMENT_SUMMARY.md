@@ -32,7 +32,7 @@
 - ✅ Responsive design for all devices
 
 ### User Roles & Access
-- **Super Admin**: nprakash315349@gmail.com, draupathiitsolutions@gmail.com
+- **Super Admin**: nprakash315349@gmail.com, draupathiitsolutions@gmail.com, ututhay@gmail.com
 - **Admin**: admin@mystore.com, manager@mystore.com
 - **Cashier**: cashier@mystore.com, cashier1@mystore.com, cashier2@mystore.com
 

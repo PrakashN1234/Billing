@@ -6,7 +6,7 @@ The billing system now includes a comprehensive role-based access control system
 ## User Roles
 
 ### 1. Super Administrator
-- **Email**: `nprakash315349@gmail.com`, `draupathiitsolutions@gmail.com`
+- **Email**: `nprakash315349@gmail.com`, `draupathiitsolutions@gmail.com`, `ututhay@gmail.com`
 - **Full System Access**: Complete control over all features
 - **Permissions**: All system functions including user management, system settings, and data deletion
 

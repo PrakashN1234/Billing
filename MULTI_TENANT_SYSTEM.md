@@ -6,7 +6,7 @@ The billing system implements a strict role-based access control system with cle
 ## User Hierarchy & Access Rights
 
 ### 1. Super Admin (Company Level)
-- **Emails**: `nprakash315349@gmail.com`, `draupathiitsolutions@gmail.com`
+- **Emails**: `nprakash315349@gmail.com`, `draupathiitsolutions@gmail.com`, `ututhay@gmail.com`
 - **Primary Focus**: User and Store Management
 - **Access**:
   - ✅ Create and manage stores

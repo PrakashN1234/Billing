@@ -45,6 +45,7 @@ export const AUTHORIZED_USERS = {
     storeId: null, // null means access to all stores
     storeName: 'Company Admin'
   },
+ 
   'ututhay@gmail.com': { 
     role: USER_ROLES.SUPER_ADMIN, 
     storeId: null, // null means access to all stores
