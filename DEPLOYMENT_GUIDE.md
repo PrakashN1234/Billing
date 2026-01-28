@@ -27,7 +27,7 @@ git commit -m "Initial commit: Supermarket Management System"
 git branch -M main
 
 # Add remote origin
-git remote add origin https://github.com/PrakashN1234/Billing-System.git
+git remote add origin https://github.com/PrakashN1234/Billing.git
 
 # Push to GitHub
 git push -u origin main

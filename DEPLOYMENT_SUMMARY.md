@@ -3,8 +3,8 @@
 ## ✅ Successfully Deployed to GitHub and GitHub Pages
 
 **Date**: January 25, 2026  
-**Repository**: https://github.com/PrakashN1234/Billing-System.git  
-**Live Application**: https://prakashn1234.github.io/Billing-System  
+**Repository**: https://github.com/PrakashN1234/Billing.git  
+**Live Application**: https://prakashn1234.github.io/Billing  
 
 ## 🚀 Deployment Details
 
@@ -12,13 +12,13 @@
 - **Status**: ✅ Successfully pushed to main branch
 - **Total Files**: 37 files changed, 7,587 insertions, 322 deletions
 - **Commit Hash**: d2fe528
-- **Repository URL**: https://github.com/PrakashN1234/Billing-System.git
+- **Repository URL**: https://github.com/PrakashN1234/Billing.git
 
 ### GitHub Pages Deployment
 - **Status**: ✅ Successfully deployed
 - **Build Status**: Compiled successfully (no errors)
 - **Bundle Size**: 329.53 kB (main.js), 15.65 kB (main.css)
-- **Live URL**: https://prakashn1234.github.io/Billing-System
+- **Live URL**: https://prakashn1234.github.io/Billing
 
 ## 📋 Project Features Deployed
 
@@ -51,10 +51,10 @@
 {
   "name": "supermarket-management-system",
   "version": "1.0.0",
-  "homepage": "https://prakashn1234.github.io/Billing-System",
+  "homepage": "https://prakashn1234.github.io/Billing",
   "repository": {
     "type": "git",
-    "url": "https://github.com/PrakashN1234/Billing-System.git"
+    "url": "https://github.com/PrakashN1234/Billing.git"
   }
 }
 ```
@@ -125,7 +125,7 @@
 ## 🌐 Access Information
 
 ### Live Application
-**URL**: https://prakashn1234.github.io/Billing-System
+**URL**: https://prakashn1234.github.io/Billing
 
 ### Test Accounts
 Use any of the authorized email addresses listed above to access the system.
@@ -177,7 +177,7 @@ Users need to configure their own Firebase project and update `src/firebase.js` 
 **Developer**: Prakash N  
 **Email**: nprakash315349@gmail.com  
 **GitHub**: [@PrakashN1234](https://github.com/PrakashN1234)  
-**Repository Issues**: https://github.com/PrakashN1234/Billing-System/issues
+**Repository Issues**: https://github.com/PrakashN1234/Billing/issues
 
 ---
 
