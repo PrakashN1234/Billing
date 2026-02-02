@@ -187,16 +187,17 @@ const BillingTable = ({ cart, inventory, updateQty, removeItem, clearCart, addTo
           <div className="manual-entry">
             <h3>🔍 Barcode / Product Search</h3>
             <p>Enter barcode number, product code, product ID, or product name:</p>
-            <input
-              type="text"
-              placeholder="Enter: 78011234567 (barcode) or RICE001 (code) or Rice (name)"
-              value={productCode}
-              onChange={(e) => setProductCode(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleFetchProduct()}
-              disabled={isProcessing}
-              className="product-code-input"
-              style={{ fontSize: '16px', padding: '12px' }}
-            />
+            <div className="input-container">
+              <input
+                type="text"
+                placeholder="Enter: 78011234567 (barcode) or RICE001 (code) or Rice (name)"
+                value={productCode}
+                onChange={(e) => setProductCode(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleFetchProduct()}
+                disabled={isProcessing}
+                className="product-code-input"
+              />
+            </div>
             <button 
               className="fetch-btn"
               onClick={handleFetchProduct}

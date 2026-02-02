@@ -4505,6 +4505,10 @@ body {
 
 .manual-entry {
   margin-bottom: 32px;
+  padding: 1rem;
+  background: #f9fafb;
+  border-radius: var(--border-radius);
+  border: 1px solid var(--gray-200);
 }
 
 .manual-entry h3 {
@@ -4514,14 +4518,29 @@ body {
   margin-bottom: 16px;
 }
 
+.manual-entry p {
+  color: var(--gray-600);
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+}
+
+.input-container {
+  margin-bottom: 1rem;
+}
+
 .product-code-input {
   width: 100%;
   padding: 12px 16px;
   border: 2px solid var(--gray-300);
   border-radius: var(--border-radius);
-  font-size: 0.875rem;
+  font-size: 16px !important;
   margin-bottom: 12px;
   transition: var(--transition);
+  background: white;
+  color: var(--gray-900);
+  box-sizing: border-box;
+  display: block;
+  min-height: 48px;
 }
 
 .product-code-input:focus {
