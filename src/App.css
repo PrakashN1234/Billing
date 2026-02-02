@@ -355,6 +355,7 @@ body {
 .action-card.purple { border-color: #8b5cf6; color: #8b5cf6; }
 .action-card.green { border-color: var(--success); color: var(--success); }
 .action-card.orange { border-color: var(--warning); color: var(--warning); }
+.action-card.red { border-color: var(--danger); color: var(--danger); }
 .action-card.indigo { border-color: #6366f1; color: #6366f1; }
 
 /* Low Stock Alert */
@@ -7063,6 +7064,10 @@ body {
 
 .action-card.teal:hover {
   background: rgba(6, 182, 212, 0.05);
+}
+
+.action-card.red:hover {
+  background: rgba(239, 68, 68, 0.05);
 }
 
 /* Admin Tools Section */
