@@ -1,17 +1,19 @@
 // Bill generation and printing utilities
 
 export const generateBillHTML = (billData) => {
-  const { items, subtotal, gst, discount, total, paymentMode, itemCount, timestamp } = billData;
+  const { items, subtotal, gst, discount, total, paymentMode, itemCount, timestamp, billNumber, storeName } = billData;
   
   const currentDate = new Date(timestamp || Date.now());
-  const billNumber = `BILL-${currentDate.getTime().toString().slice(-8)}`;
+  // Use the generated bill number from the data, fallback to timestamp-based if not available
+  const displayBillNumber = billNumber || `BILL-${currentDate.getTime().toString().slice(-8)}`;
+  const displayStoreName = storeName || 'PRABA STORE';
   
   return `
     <!DOCTYPE html>
     <html>
     <head>
       <meta charset="UTF-8">
-      <title>Bill - ${billNumber}</title>
+      <title>Bill - ${displayBillNumber}</title>
       <style>
         body {
           font-family: 'Courier New', monospace;
@@ -116,7 +118,7 @@ export const generateBillHTML = (billData) => {
     <body>
       <div class="bill-container">
         <div class="header">
-          <div class="store-name">PRABA STORE</div>
+          <div class="store-name">${displayStoreName.toUpperCase()}</div>
           <div class="store-details">
             123 Main Street, City<br>
             Phone: +91 98765 43210<br>
@@ -126,7 +128,7 @@ export const generateBillHTML = (billData) => {
         
         <div class="bill-info">
           <div>
-            <strong>Bill No:</strong> ${billNumber}<br>
+            <strong>Bill No:</strong> ${displayBillNumber}<br>
             <strong>Date:</strong> ${currentDate.toLocaleDateString()}<br>
             <strong>Time:</strong> ${currentDate.toLocaleTimeString()}
           </div>
@@ -214,7 +216,8 @@ export const printBill = (billData) => {
 export const downloadBill = (billData) => {
   const billHTML = generateBillHTML(billData);
   const currentDate = new Date(billData.timestamp || Date.now());
-  const billNumber = `BILL-${currentDate.getTime().toString().slice(-8)}`;
+  // Use the actual bill number from the data
+  const displayBillNumber = billData.billNumber || `BILL-${currentDate.getTime().toString().slice(-8)}`;
   
   // Create blob and download
   const blob = new Blob([billHTML], { type: 'text/html' });
@@ -222,7 +225,7 @@ export const downloadBill = (billData) => {
   
   const link = document.createElement('a');
   link.href = url;
-  link.download = `${billNumber}_${currentDate.toISOString().split('T')[0]}.html`;
+  link.download = `${displayBillNumber}_${currentDate.toISOString().split('T')[0]}.html`;
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);

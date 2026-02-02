@@ -3,8 +3,13 @@ import { Trash2, Receipt, AlertCircle, Camera, Package, Printer, Download, FileT
 import { saveSale, updateStock } from '../services/firebaseService';
 import BarcodeScanner from './BarcodeScanner';
 import { printBill, downloadBill, generatePDF } from '../utils/billGenerator';
+import { useAuth } from '../contexts/AuthContext';
+import { getUserStoreId, getUserStoreName } from '../utils/roleManager';
 
 const BillingTable = ({ cart, inventory, updateQty, removeItem, clearCart, addToCart }) => {
+  const { currentUser } = useAuth();
+  const userStoreId = getUserStoreId(currentUser?.email);
+  const userStoreName = getUserStoreName(currentUser?.email);
   const [isProcessing, setIsProcessing] = useState(false);
   const [productCode, setProductCode] = useState('');
   const [discount, setDiscount] = useState(0);
@@ -71,11 +76,14 @@ const BillingTable = ({ cart, inventory, updateQty, removeItem, clearCart, addTo
         total: total,
         paymentMode: paymentMode,
         itemCount: cart.reduce((acc, item) => acc + item.qty, 0),
-        timestamp: Date.now()
+        timestamp: Date.now(),
+        storeId: userStoreId,
+        storeName: userStoreName,
+        cashierEmail: currentUser?.email
       };
 
-      // Save sale to Firebase
-      await saveSale(saleData);
+      // Save sale to Firebase (will generate bill number automatically)
+      const billNumber = await saveSale(saleData);
 
       // Update stock levels
       const stockUpdates = cart.map(item => {
@@ -88,8 +96,11 @@ const BillingTable = ({ cart, inventory, updateQty, removeItem, clearCart, addTo
 
       await updateStock(stockUpdates);
 
-      // Store bill data for printing/downloading
-      setLastBillData(saleData);
+      // Store bill data for printing/downloading (include bill number)
+      setLastBillData({
+        ...saleData,
+        billNumber: billNumber
+      });
       
       // Clear cart and show success with bill options
       clearCart();
@@ -362,6 +373,7 @@ const BillingTable = ({ cart, inventory, updateQty, removeItem, clearCart, addTo
               <div className="success-message">
                 <div className="success-icon">✓</div>
                 <div className="success-details">
+                  <p><strong>Bill Number: {lastBillData.billNumber}</strong></p>
                   <p><strong>Total Amount: ₹{lastBillData.total.toFixed(2)}</strong></p>
                   <p>Payment Mode: {lastBillData.paymentMode}</p>
                   <p>Items: {lastBillData.itemCount}</p>

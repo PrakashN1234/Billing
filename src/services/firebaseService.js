@@ -14,6 +14,7 @@ import {
   where
 } from 'firebase/firestore';
 import { db } from '../firebase';
+import { generateNextBillNumber } from '../utils/billNumberGenerator';
 
 // Inventory Management
 export const getInventory = async () => {
@@ -104,13 +105,23 @@ export const subscribeToInventory = (callback, errorCallback) => {
 // Sales Management
 export const saveSale = async (saleData) => {
   try {
+    // Generate sequential bill number
+    const billNumber = await generateNextBillNumber(saleData.storeId || 'default');
+    
     const salesRef = collection(db, 'sales');
-    const docRef = await addDoc(salesRef, {
+    
+    // Use bill number as document ID
+    const docRef = doc(salesRef, billNumber);
+    await setDoc(docRef, {
       ...saleData,
+      billNumber: billNumber,
+      id: billNumber, // Ensure ID matches bill number
       timestamp: serverTimestamp(),
       date: new Date().toISOString().split('T')[0]
     });
-    return docRef.id;
+    
+    console.log(`Sale saved with bill number: ${billNumber}`);
+    return billNumber;
   } catch (error) {
     console.error('Error saving sale:', error);
     throw error;
