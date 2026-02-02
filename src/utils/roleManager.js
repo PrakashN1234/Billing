@@ -24,7 +24,8 @@ export const ROLE_PERMISSIONS = {
     'view_reports',
     'manage_barcodes',
     'view_activity',
-    'export_data'
+    'export_data',
+    'manage_store_users' // New permission for managing users in their store
   ],
   [USER_ROLES.CASHIER]: [
     'view_dashboard',
@@ -274,6 +275,7 @@ export const canAccessView = (email, view) => {
     'inventory': 'view_inventory', // Changed from 'manage_inventory' to 'view_inventory'
     'stores': 'manage_stores',
     'users': 'manage_users',
+    'store-users': 'manage_store_users',
     'reports': 'view_reports',
     'barcode': 'manage_barcodes',
     'activity': 'view_activity',

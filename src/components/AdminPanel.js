@@ -2,8 +2,13 @@ import { useState, useEffect } from 'react';
 import { Plus, Edit2, Trash2, Save, X, RefreshCw } from 'lucide-react';
 import { addProduct, updateProduct, deleteProduct, getSales } from '../services/firebaseService';
 import { generateUniqueProductCode, suggestProductCodes } from '../utils/productCodeGenerator';
+import { useAuth } from '../contexts/AuthContext';
+import { getUserStoreId, getUserStoreName } from '../utils/roleManager';
 
 const AdminPanel = ({ inventory, onClose }) => {
+  const { currentUser } = useAuth();
+  const userStoreId = getUserStoreId(currentUser?.email);
+  const userStoreName = getUserStoreName(currentUser?.email);
   const [activeTab, setActiveTab] = useState('inventory');
   const [editingProduct, setEditingProduct] = useState(null);
   const [newProduct, setNewProduct] = useState({
@@ -49,13 +54,16 @@ const AdminPanel = ({ inventory, onClose }) => {
         name: newProduct.name,
         price: parseFloat(newProduct.price),
         stock: parseInt(newProduct.stock),
-        code: productCode
+        code: productCode,
+        storeId: userStoreId, // Associate with admin's store
+        storeName: userStoreName
       });
       
       setNewProduct({ name: '', price: '', stock: '', code: '' });
       setSuggestedCodes([]);
-      alert(`Product added successfully with code: ${productCode}`);
+      alert(`Product added successfully to ${userStoreName} with code: ${productCode}`);
     } catch (error) {
+      console.error('Error adding product:', error);
       alert('Error adding product');
     }
   };

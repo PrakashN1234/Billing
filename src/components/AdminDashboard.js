@@ -117,6 +117,9 @@ const AdminDashboard = ({ inventory, setActiveView }) => {
       case 'lowstock':
         setActiveView('lowstock');
         break;
+      case 'users':
+        setActiveView('store-users');
+        break;
       case 'generate-codes':
         await handleGenerateAllCodes();
         break;
@@ -194,7 +197,8 @@ const AdminDashboard = ({ inventory, setActiveView }) => {
     { id: 'product', label: 'Add Product', icon: Plus, color: 'green' },
     { id: 'reports', label: 'Sales Reports', icon: BarChart3, color: 'indigo' },
     { id: 'barcode', label: 'Manage Barcodes', icon: QrCode, color: 'teal' },
-    { id: 'activity', label: 'View Activity', icon: Activity, color: 'purple' },
+    { id: 'users', label: 'Manage Users', icon: UserCheck, color: 'purple' },
+    { id: 'activity', label: 'View Activity', icon: Activity, color: 'blue' },
     { id: 'lowstock', label: 'Low Stock', icon: AlertTriangle, color: 'orange' }
   ];
 
@@ -227,9 +231,9 @@ const AdminDashboard = ({ inventory, setActiveView }) => {
             <UserCheck size={16} />
             <span>{getRoleDisplayName(userRole)}</span>
           </div>
-          <h1>Admin Dashboard</h1>
+          <h1>Admin Dashboard - {userInfo?.storeName || 'Main Store'}</h1>
           <div className="welcome-banner">
-            <span>Welcome back, {getUserDisplayName()}! Managing {userInfo?.storeName || 'your store'} efficiently.</span>
+            <span>Welcome back, {getUserDisplayName()}! Managing {userInfo?.storeName || 'Main Store'} efficiently.</span>
           </div>
         </div>
         <div className="user-profile">

@@ -8,6 +8,7 @@ import CashierDashboard from './components/CashierDashboard';
 import UnauthorizedAccess from './components/UnauthorizedAccess';
 import StoresView from './components/StoresView';
 import UsersView from './components/UsersView';
+import StoreUsersView from './components/StoreUsersView';
 import ReportsView from './components/ReportsView';
 import LowStockView from './components/LowStockView';
 import ActivityView from './components/ActivityView';
@@ -318,6 +319,8 @@ const MainApp = () => {
         return <StoresView />;
       case 'users':
         return <UsersView />;
+      case 'store-users':
+        return <StoreUsersView />;
       case 'inventory':
         // Show different inventory views based on user role
         if (hasPermission(currentUser.email, 'manage_inventory')) {
