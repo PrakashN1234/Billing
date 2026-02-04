@@ -9,7 +9,8 @@ import {
   UserCheck,
   Activity,
   QrCode,
-  Users
+  Users,
+  Settings
 } from 'lucide-react';
 import { getSalesByStore, getAccessibleStores, subscribeToUsers } from '../services/firebaseService';
 import { useAuth } from '../contexts/AuthContext';
@@ -198,6 +199,9 @@ const AdminDashboard = ({ inventory, setActiveView }) => {
       case 'users':
         setActiveView('store-users');
         break;
+      case 'settings':
+        setActiveView('settings');
+        break;
       case 'generate-codes':
         await handleGenerateAllCodes();
         break;
@@ -277,7 +281,8 @@ const AdminDashboard = ({ inventory, setActiveView }) => {
     { id: 'barcode', label: 'Manage Barcodes', icon: QrCode, color: 'teal' },
     { id: 'users', label: 'Manage Users', icon: UserCheck, color: 'purple' },
     { id: 'activity', label: 'View Activity', icon: Activity, color: 'blue' },
-    { id: 'lowstock', label: 'Low Stock', icon: AlertTriangle, color: 'orange' }
+    { id: 'lowstock', label: 'Low Stock', icon: AlertTriangle, color: 'orange' },
+    { id: 'settings', label: 'Store Settings', icon: Settings, color: 'gray' }
   ];
 
   const lowStockItems = inventory.filter(item => item.stock < 10);

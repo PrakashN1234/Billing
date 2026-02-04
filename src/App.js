@@ -9,6 +9,7 @@ import UnauthorizedAccess from './components/UnauthorizedAccess';
 import StoresView from './components/StoresView';
 import UserManagement from './components/UserManagement';
 import StoreUsersView from './components/StoreUsersView';
+import StoreSettings from './components/StoreSettings';
 import ReportsView from './components/ReportsView';
 import LowStockView from './components/LowStockView';
 import ActivityView from './components/ActivityView';
@@ -413,76 +414,12 @@ const MainApp = () => {
       case 'activity':
         return <ActivityView inventory={inventory} />;
       case 'settings':
-        return (
-          <div className="settings-view">
-            <div className="settings-header">
-              <h1>System Settings</h1>
-              <p>Configure system-wide settings and preferences</p>
-            </div>
-            <div className="settings-content">
-              <div className="settings-section">
-                <h3>General Settings</h3>
-                <div className="setting-item">
-                  <label>System Name</label>
-                  <input type="text" defaultValue="My Store Management System" />
-                </div>
-                <div className="setting-item">
-                  <label>Default Currency</label>
-                  <select defaultValue="INR">
-                    <option value="INR">Indian Rupee (₹)</option>
-                    <option value="USD">US Dollar ($)</option>
-                    <option value="EUR">Euro (€)</option>
-                  </select>
-                </div>
-                <div className="setting-item">
-                  <label>Tax Rate (%)</label>
-                  <input type="number" defaultValue="18" min="0" max="100" />
-                </div>
-              </div>
-              
-              <div className="settings-section">
-                <h3>Inventory Settings</h3>
-                <div className="setting-item">
-                  <label>Low Stock Threshold</label>
-                  <input type="number" defaultValue="10" min="1" />
-                </div>
-                <div className="setting-item">
-                  <label>Auto-generate Product Codes</label>
-                  <input type="checkbox" defaultChecked />
-                </div>
-                <div className="setting-item">
-                  <label>Auto-generate Barcodes</label>
-                  <input type="checkbox" defaultChecked />
-                </div>
-              </div>
-              
-              <div className="settings-section">
-                <h3>System Information</h3>
-                <div className="info-grid">
-                  <div className="info-item">
-                    <span className="info-label">Version</span>
-                    <span className="info-value">1.0.0</span>
-                  </div>
-                  <div className="info-item">
-                    <span className="info-label">Last Updated</span>
-                    <span className="info-value">{new Date().toLocaleDateString()}</span>
-                  </div>
-                  <div className="info-item">
-                    <span className="info-label">Database Status</span>
-                    <span className="info-value status-active">Connected</span>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="settings-actions">
-                <button className="btn-primary">Save Settings</button>
-                <button className="btn-secondary" onClick={() => setActiveView('dashboard')}>
-                  Back to Dashboard
-                </button>
-              </div>
-            </div>
-          </div>
-        );
+        // Only store admins can access settings
+        if (userRole === USER_ROLES.ADMIN) {
+          return <StoreSettings />;
+        } else {
+          return <UnauthorizedAccess />;
+        }
       default:
         return renderDashboard(userRole);
     }

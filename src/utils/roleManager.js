@@ -25,7 +25,8 @@ export const ROLE_PERMISSIONS = {
     'manage_barcodes',
     'view_activity',
     'export_data',
-    'manage_store_users' // New permission for managing users in their store
+    'manage_store_users', // New permission for managing users in their store
+    'store_settings' // New permission for store-specific settings
   ],
   [USER_ROLES.CASHIER]: [
     'view_dashboard',
@@ -337,7 +338,7 @@ export const canAccessView = (email, view) => {
     'barcode': 'manage_barcodes',
     'activity': 'view_activity',
     'lowstock': 'view_inventory',
-    'settings': 'system_settings'
+    'settings': 'store_settings' // Only store settings, not system settings
   };
   
   const requiredPermission = viewPermissions[view];
@@ -417,15 +418,21 @@ export const getNavigationItems = (email) => {
     { id: 'reports', label: 'Reports', permission: 'view_reports', icon: 'BarChart3' },
     { id: 'barcode', label: 'Barcodes', permission: 'manage_barcodes', icon: 'QrCode' },
     { id: 'activity', label: 'Activity', permission: 'view_activity', icon: 'Activity' },
-    { id: 'lowstock', label: 'Low Stock', permission: 'view_inventory', icon: 'AlertTriangle' }
+    { id: 'lowstock', label: 'Low Stock', permission: 'view_inventory', icon: 'AlertTriangle' },
+    { id: 'settings', label: 'Settings', permission: ['store_settings'], icon: 'Settings', storeAdminOnly: true }
   ];
   
   return allItems.filter(item => {
     // Check if user has permission
-    if (!permissions.includes(item.permission)) return false;
+    const itemPermissions = Array.isArray(item.permission) ? item.permission : [item.permission];
+    const hasRequiredPermission = itemPermissions.some(permission => permissions.includes(permission));
+    if (!hasRequiredPermission) return false;
     
     // Check if item is super admin only
     if (item.superAdminOnly && !userInfo?.isSuperAdmin) return false;
+    
+    // Check if item is store admin only (exclude super admins)
+    if (item.storeAdminOnly && userInfo?.isSuperAdmin) return false;
     
     return true;
   });

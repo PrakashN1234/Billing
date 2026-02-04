@@ -8,7 +8,8 @@ import {
   AlertTriangle, 
   Activity,
   LogOut,
-  QrCode
+  QrCode,
+  Settings
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { getNavigationItems, getUserRole, getRoleDisplayName, getUserInfo } from '../utils/roleManager';
@@ -40,7 +41,8 @@ const Sidebar = ({ activeView, setActiveView, userEmail }) => {
     'BarChart3': BarChart3,
     'QrCode': QrCode,
     'Activity': Activity,
-    'AlertTriangle': AlertTriangle
+    'AlertTriangle': AlertTriangle,
+    'Settings': Settings
   };
 
   const getUserDisplayName = () => {

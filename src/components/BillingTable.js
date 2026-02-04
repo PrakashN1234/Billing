@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Trash2, Receipt, AlertCircle, Camera, Package, Printer, Download, FileText, X } from 'lucide-react';
 import { saveSale, updateStock } from '../services/firebaseService';
+import { getStoreSettings, calculateBillTotal, formatCurrency, getTaxDisplayName } from '../services/storeSettingsService';
 import BarcodeScanner from './BarcodeScanner';
 import { printBill, downloadBill, generatePDF } from '../utils/billGenerator';
 import { useAuth } from '../contexts/AuthContext';
@@ -17,35 +18,58 @@ const BillingTable = ({ cart, inventory, updateQty, removeItem, clearCart, addTo
   const [scannerActive, setScannerActive] = useState(false);
   const [showBillActions, setShowBillActions] = useState(false);
   const [lastBillData, setLastBillData] = useState(null);
+  const [storeSettings, setStoreSettings] = useState({ taxRate: 18, currency: 'INR', currencySymbol: '₹' });
+
+  // Load store settings
+  useEffect(() => {
+    const loadStoreSettings = async () => {
+      if (userStoreId) {
+        try {
+          const settings = await getStoreSettings(userStoreId);
+          setStoreSettings(settings);
+        } catch (error) {
+          console.error('Error loading store settings:', error);
+        }
+      }
+    };
+    
+    loadStoreSettings();
+  }, [userStoreId]);
 
   const subtotal = cart.reduce((acc, item) => acc + (item.price * item.qty), 0);
-  const gst = subtotal * 0.18; // 18% GST for India
   const discountAmount = (subtotal * discount) / 100;
-  const total = subtotal + gst - discountAmount;
+  
+  // Use dynamic tax calculation from store settings
+  const billCalculation = calculateBillTotal(subtotal, storeSettings.taxRate, discountAmount);
+  const { taxAmount, total } = billCalculation;
 
-  const handleFetchProduct = () => {
-    if (!productCode.trim()) {
+  const handleFetchProduct = (codeToSearch = null) => {
+    const searchCode = codeToSearch || productCode;
+    
+    if (!searchCode.trim()) {
       alert('Please enter a product code');
       return;
     }
 
     // Search by barcode first, then by product code, then by ID, then by name
     const product = inventory.find(p => 
-      p.barcode === productCode.trim() ||
-      p.code === productCode.trim().toUpperCase() ||
-      p.id.toLowerCase() === productCode.toLowerCase() || 
-      p.name.toLowerCase().includes(productCode.toLowerCase())
+      p.barcode === searchCode.trim() ||
+      p.code === searchCode.trim().toUpperCase() ||
+      p.id.toLowerCase() === searchCode.toLowerCase() || 
+      p.name.toLowerCase().includes(searchCode.toLowerCase())
     );
 
     if (product) {
       if (product.stock > 0) {
         addToCart(product);
         setProductCode('');
+        console.log('✅ Product added to cart:', product.name);
       } else {
         alert('Product is out of stock!');
       }
     } else {
-      alert('Product not found! Please check the barcode or product code.');
+      console.log('❌ Product not found for code:', searchCode);
+      alert(`Product not found! Please check the barcode or product code: ${searchCode}`);
     }
   };
 
@@ -71,7 +95,8 @@ const BillingTable = ({ cart, inventory, updateQty, removeItem, clearCart, addTo
           total: item.price * item.qty
         })),
         subtotal: subtotal,
-        gst: gst,
+        taxRate: storeSettings.taxRate,
+        taxAmount: taxAmount,
         discount: discountAmount,
         total: total,
         paymentMode: paymentMode,
@@ -79,7 +104,9 @@ const BillingTable = ({ cart, inventory, updateQty, removeItem, clearCart, addTo
         timestamp: Date.now(),
         storeId: userStoreId,
         storeName: userStoreName,
-        cashierEmail: currentUser?.email
+        cashierEmail: currentUser?.email,
+        currency: storeSettings.currency,
+        currencySymbol: storeSettings.currencySymbol
       };
 
       // Save sale to Firebase (will generate bill number automatically)
@@ -257,12 +284,12 @@ const BillingTable = ({ cart, inventory, updateQty, removeItem, clearCart, addTo
           <div className="bill-details">
             <div className="bill-row">
               <span>Subtotal:</span>
-              <span>₹{subtotal.toFixed(2)}</span>
+              <span>{formatCurrency(subtotal, storeSettings.currency, storeSettings.currencySymbol)}</span>
             </div>
             
             <div className="bill-row">
-              <span>GST:</span>
-              <span>₹{gst.toFixed(2)}</span>
+              <span>{getTaxDisplayName(storeSettings.currency)} ({storeSettings.taxRate}%):</span>
+              <span>{formatCurrency(taxAmount, storeSettings.currency, storeSettings.currencySymbol)}</span>
             </div>
 
             <div className="discount-section">
@@ -280,7 +307,7 @@ const BillingTable = ({ cart, inventory, updateQty, removeItem, clearCart, addTo
 
             <div className="bill-row total-row">
               <span>Total:</span>
-              <span>₹{total.toFixed(2)}</span>
+              <span>{formatCurrency(total, storeSettings.currency, storeSettings.currencySymbol)}</span>
             </div>
 
             <div className="payment-section">
@@ -431,8 +458,8 @@ const BillingTable = ({ cart, inventory, updateQty, removeItem, clearCart, addTo
       <BarcodeScanner 
         isActive={scannerActive}
         onScan={(code) => {
-          setProductCode(code);
-          handleFetchProduct();
+          console.log('Barcode scanned in BillingTable:', code);
+          handleFetchProduct(code);
           setScannerActive(false);
         }}
         onClose={() => setScannerActive(false)}
