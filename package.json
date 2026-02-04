@@ -5,7 +5,15 @@
   "private": true,
   "homepage": "https://prakashn1234.github.io/Billing",
   "description": "A comprehensive React-based supermarket management system with role-based access control, inventory management, billing, and barcode generation.",
-  "keywords": ["supermarket", "pos", "inventory", "billing", "barcode", "react", "firebase"],
+  "keywords": [
+    "supermarket",
+    "pos",
+    "inventory",
+    "billing",
+    "barcode",
+    "react",
+    "firebase"
+  ],
   "author": {
     "name": "Prakash N",
     "email": "nprakash315349@gmail.com",

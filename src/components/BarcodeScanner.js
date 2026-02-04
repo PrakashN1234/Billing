@@ -1,280 +1,207 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { X, CheckCircle, AlertCircle, RotateCcw } from 'lucide-react';
-import { BrowserMultiFormatReader, NotFoundException } from '@zxing/library';
+import { useState, useEffect, useRef } from 'react';
+import { Camera, X, CheckCircle, AlertCircle, Keyboard, Zap } from 'lucide-react';
 
 const BarcodeScanner = ({ onScan, onClose, isActive }) => {
-  const [error, setError] = useState(null);
-  const [isScanning, setIsScanning] = useState(false);
-  const [devices, setDevices] = useState([]);
-  const [selectedDevice, setSelectedDevice] = useState(null);
-  const [scanResult, setScanResult] = useState(null);
-  const videoRef = useRef(null);
-  const codeReader = useRef(null);
+  const [manualCode, setManualCode] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [recentScans, setRecentScans] = useState([]);
+  const inputRef = useRef(null);
 
   useEffect(() => {
-    // Initialize code reader
-    codeReader.current = new BrowserMultiFormatReader();
+    if (isActive && inputRef.current) {
+      // Focus the input when scanner opens
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 100);
+    }
+  }, [isActive]);
+
+  const handleManualSubmit = async () => {
+    const code = manualCode.trim();
+    if (!code) return;
+
+    setIsSubmitting(true);
     
-    return () => {
-      // Cleanup on unmount
-      if (codeReader.current) {
-        codeReader.current.reset();
-      }
-    };
-  }, []);
+    // Add to recent scans
+    setRecentScans(prev => {
+      const newScans = [code, ...prev.filter(s => s !== code)].slice(0, 5);
+      return newScans;
+    });
 
-  useEffect(() => {
-    if (isActive) {
-      initializeScanner();
-    } else {
-      stopScanning();
-    }
-
-    return () => {
-      stopScanning();
-    };
-  }, [isActive, initializeScanner]);
-
-  const initializeScanner = useCallback(async () => {
     try {
-      setError(null);
-      setIsScanning(false);
+      console.log('Submitting barcode:', code);
+      await onScan(code);
+      setManualCode('');
       
-      // Get available video devices
-      const videoDevices = await codeReader.current.listVideoInputDevices();
-      console.log('Available cameras:', videoDevices);
-      
-      if (videoDevices.length === 0) {
-        throw new Error('No camera devices found. Please ensure a camera is connected and permissions are granted.');
-      }
-
-      setDevices(videoDevices);
-      
-      // Prefer back camera for mobile devices
-      const backCamera = videoDevices.find(device => 
-        device.label.toLowerCase().includes('back') || 
-        device.label.toLowerCase().includes('rear') ||
-        device.label.toLowerCase().includes('environment')
-      );
-      
-      const deviceToUse = backCamera || videoDevices[0];
-      setSelectedDevice(deviceToUse);
-      
-      await startScanning(deviceToUse.deviceId);
-      
-    } catch (err) {
-      console.error('Scanner initialization error:', err);
-      setError(err.message || 'Failed to initialize camera. Please check permissions.');
-    }
-  }, []);
-
-  const startScanning = async (deviceId) => {
-    try {
-      setIsScanning(true);
-      setError(null);
-      
-      console.log('Starting barcode scanning with device:', deviceId);
-      
-      // Start decoding from video device
-      const result = await codeReader.current.decodeOnceFromVideoDevice(deviceId, videoRef.current);
-      
-      if (result) {
-        const scannedText = result.getText();
-        console.log('Barcode detected:', scannedText);
-        
-        setScanResult(scannedText);
-        
-        // Call the onScan callback with the result
-        setTimeout(() => {
-          onScan(scannedText);
-        }, 500); // Small delay to show the result
+      // Vibrate if supported
+      if (navigator.vibrate) {
+        navigator.vibrate([100, 50, 100]);
       }
       
-    } catch (err) {
-      console.error('Scanning error:', err);
-      
-      if (err instanceof NotFoundException) {
-        // This is normal - no barcode found, keep scanning
-        if (isActive && isScanning) {
-          // Retry scanning after a short delay
-          setTimeout(() => {
-            if (isActive && videoRef.current) {
-              startScanning(deviceId);
-            }
-          }, 100);
-        }
-      } else {
-        setError(err.message || 'Scanning failed. Please try again.');
-        setIsScanning(false);
-      }
+    } catch (error) {
+      console.error('Error processing barcode:', error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const stopScanning = () => {
-    try {
-      if (codeReader.current) {
-        codeReader.current.reset();
-      }
-      setIsScanning(false);
-      setScanResult(null);
-    } catch (err) {
-      console.error('Error stopping scanner:', err);
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter' && !isSubmitting) {
+      handleManualSubmit();
     }
   };
 
-  const retryScanning = () => {
-    if (selectedDevice) {
-      startScanning(selectedDevice.deviceId);
-    } else {
-      initializeScanner();
-    }
+  const handleRecentScanClick = (code) => {
+    setManualCode(code);
+    inputRef.current?.focus();
   };
 
-  const switchCamera = async () => {
-    if (devices.length > 1) {
-      const currentIndex = devices.findIndex(d => d.deviceId === selectedDevice?.deviceId);
-      const nextIndex = (currentIndex + 1) % devices.length;
-      const nextDevice = devices[nextIndex];
-      
-      setSelectedDevice(nextDevice);
-      stopScanning();
-      await startScanning(nextDevice.deviceId);
-    }
-  };
-
-  const handleManualInput = (code) => {
-    if (code.trim()) {
-      onScan(code.trim());
-    }
-  };
+  const quickCodes = [
+    { code: 'RICE001', label: 'Rice' },
+    { code: 'MILK001', label: 'Milk' },
+    { code: 'BREAD001', label: 'Bread' },
+    { code: 'EGGS001', label: 'Eggs' }
+  ];
 
   if (!isActive) return null;
 
   return (
-    <div className="scanner-overlay">
-      <div className="scanner-modal">
+    <div className="barcode-scanner-overlay">
+      <div className="barcode-scanner-modal">
         <div className="scanner-header">
-          <h3>Barcode Scanner</h3>
-          <div className="scanner-controls">
-            {devices.length > 1 && (
-              <button 
-                className="switch-camera-btn" 
-                onClick={switchCamera}
-                title="Switch Camera"
-              >
-                <RotateCcw size={16} />
-              </button>
-            )}
-            <button className="close-btn" onClick={onClose}>
-              <X size={20} />
-            </button>
+          <div className="header-content">
+            <Keyboard size={24} />
+            <h3>Product Scanner</h3>
           </div>
+          <button className="close-btn" onClick={onClose}>
+            <X size={20} />
+          </button>
         </div>
 
         <div className="scanner-content">
-          {error ? (
-            <div className="scanner-error">
-              <div className="error-message">
-                <AlertCircle size={48} />
-                <h4>Camera Error</h4>
-                <p>{error}</p>
-                <div className="error-tips">
-                  <p>Please ensure:</p>
-                  <ul>
-                    <li>Camera permissions are granted</li>
-                    <li>No other app is using the camera</li>
-                    <li>You're using HTTPS (required for camera access)</li>
-                    <li>Your browser supports camera access</li>
-                  </ul>
-                </div>
-                <button onClick={retryScanning} className="retry-btn">
-                  <RotateCcw size={16} />
-                  Try Again
-                </button>
+          {/* Main Input Section */}
+          <div className="main-input-section">
+            <div className="input-header">
+              <CheckCircle size={20} />
+              <h4>Enter Product Code or Barcode</h4>
+            </div>
+            
+            <div className="input-group">
+              <input
+                ref={inputRef}
+                type="text"
+                value={manualCode}
+                onChange={(e) => setManualCode(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder="Type or scan barcode number..."
+                className="main-input"
+                disabled={isSubmitting}
+              />
+              <button
+                onClick={handleManualSubmit}
+                className="submit-btn"
+                disabled={!manualCode.trim() || isSubmitting}
+              >
+                {isSubmitting ? (
+                  <>
+                    <div className="spinner"></div>
+                    Adding...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle size={16} />
+                    Add Product
+                  </>
+                )}
+              </button>
+            </div>
+
+            <div className="input-tips">
+              <div className="tip-row">
+                <span className="tip-icon">🔢</span>
+                <span>Enter barcode numbers (e.g., 1234567890123)</span>
+              </div>
+              <div className="tip-row">
+                <span className="tip-icon">🏷️</span>
+                <span>Use product codes (e.g., RICE001, MILK001)</span>
+              </div>
+              <div className="tip-row">
+                <span className="tip-icon">🔍</span>
+                <span>Search by name (e.g., "rice", "milk")</span>
               </div>
             </div>
-          ) : (
-            <div className="camera-container">
-              <video
-                ref={videoRef}
-                className="scanner-video"
-                autoPlay
-                playsInline
-                muted
-              />
-              
-              <div className="scanner-overlay-frame">
-                <div className="scanner-frame">
-                  <div className="corner top-left"></div>
-                  <div className="corner top-right"></div>
-                  <div className="corner bottom-left"></div>
-                  <div className="corner bottom-right"></div>
-                </div>
-                
-                {scanResult ? (
-                  <div className="scan-result">
-                    <CheckCircle size={24} />
-                    <p>Barcode Detected!</p>
-                    <code>{scanResult}</code>
-                  </div>
-                ) : (
-                  <div className="scan-instructions">
-                    <p>Position barcode within the frame</p>
-                    <div className="scanner-status">
-                      {isScanning ? (
-                        <span className="scanning">📷 Scanning...</span>
-                      ) : (
-                        <span className="initializing">🔄 Initializing...</span>
-                      )}
-                    </div>
-                  </div>
-                )}
+          </div>
+
+          {/* Quick Access Codes */}
+          <div className="quick-codes-section">
+            <h4>Quick Access</h4>
+            <div className="quick-codes-grid">
+              {quickCodes.map((item) => (
+                <button
+                  key={item.code}
+                  className="quick-code-btn"
+                  onClick={() => handleRecentScanClick(item.code)}
+                  disabled={isSubmitting}
+                >
+                  <span className="code">{item.code}</span>
+                  <span className="label">{item.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Recent Scans */}
+          {recentScans.length > 0 && (
+            <div className="recent-scans-section">
+              <h4>Recent Scans</h4>
+              <div className="recent-scans-list">
+                {recentScans.map((code, index) => (
+                  <button
+                    key={`${code}-${index}`}
+                    className="recent-scan-btn"
+                    onClick={() => handleRecentScanClick(code)}
+                    disabled={isSubmitting}
+                  >
+                    <Zap size={14} />
+                    <span>{code}</span>
+                  </button>
+                ))}
               </div>
             </div>
           )}
 
-          <div className="manual-input-section">
-            <h4>Manual Entry</h4>
-            <p>Can't scan? Enter the barcode manually:</p>
-            <div className="manual-input-group">
-              <input
-                type="text"
-                placeholder="Enter barcode number"
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    handleManualInput(e.target.value);
-                  }
-                }}
-                className="manual-input"
-                autoFocus={!!error}
-              />
-              <button
-                onClick={(e) => {
-                  const input = e.target.previousElementSibling;
-                  handleManualInput(input.value);
-                }}
-                className="manual-submit-btn"
-              >
-                <CheckCircle size={16} />
-                Add Product
-              </button>
+          {/* Camera Scanner Notice */}
+          <div className="camera-notice">
+            <div className="notice-content">
+              <Camera size={20} />
+              <div className="notice-text">
+                <h4>Camera Scanning</h4>
+                <p>
+                  Camera barcode scanning is currently disabled for better reliability. 
+                  Manual entry provides faster and more accurate results.
+                </p>
+              </div>
             </div>
           </div>
 
-          <div className="scanner-info">
-            <div className="scanner-tips">
-              <h4>Scanning Tips:</h4>
-              <ul>
-                <li>Hold the camera steady and 6-12 inches from the barcode</li>
-                <li>Ensure good lighting - avoid shadows and glare</li>
-                <li>Keep the barcode flat and clearly visible</li>
-                <li>Try different angles if scanning fails</li>
-                <li>Use manual entry if camera scanning doesn't work</li>
-              </ul>
-            </div>
-            
-            <div className="supported-formats">
-              <p><strong>Supported Formats:</strong> CODE128, CODE39, EAN13, EAN8, UPC-A, UPC-E, QR Code</p>
+          {/* Help Section */}
+          <div className="help-section">
+            <h4>Need Help?</h4>
+            <div className="help-grid">
+              <div className="help-item">
+                <AlertCircle size={16} />
+                <div>
+                  <strong>Product not found?</strong>
+                  <p>Try using the product name or check if the product exists in inventory.</p>
+                </div>
+              </div>
+              <div className="help-item">
+                <CheckCircle size={16} />
+                <div>
+                  <strong>Multiple formats supported:</strong>
+                  <p>Barcodes, product codes, or partial product names all work.</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>

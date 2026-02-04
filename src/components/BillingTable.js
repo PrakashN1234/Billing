@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Trash2, Receipt, AlertCircle, Camera, Package, Printer, Download, FileText, X } from 'lucide-react';
 import { saveSale, updateStock } from '../services/firebaseService';
 import { getStoreSettings, calculateBillTotal, formatCurrency, getTaxDisplayName } from '../services/storeSettingsService';
-import BarcodeScanner from './BarcodeScanner';
+import BarcodeScanner from './ModernBarcodeScanner';
 import { printBill, downloadBill, generatePDF } from '../utils/billGenerator';
 import { useAuth } from '../contexts/AuthContext';
 import { getUserStoreId, getUserStoreName } from '../utils/roleManager';
