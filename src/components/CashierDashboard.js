@@ -123,6 +123,27 @@ const CashierDashboard = ({ inventory, setActiveView }) => {
 
   return (
     <div className="dashboard cashier-dashboard">
+      {/* Store Context Header */}
+      <div className="store-context-header">
+        <div className="store-info-card cashier">
+          <div className="store-icon">
+            <Package size={24} />
+          </div>
+          <div className="store-details">
+            <h2>Currently Working At</h2>
+            <h1>{userInfo?.storeName || 'ABC'}</h1>
+            <div className="store-meta">
+              <span className="store-id">Store ID: {userStoreId || 'store_001'}</span>
+              <span className="admin-role">{getCurrentShift()}</span>
+            </div>
+          </div>
+          <div className="store-status">
+            <div className="status-indicator active"></div>
+            <span>Active</span>
+          </div>
+        </div>
+      </div>
+
       <div className="dashboard-header">
         <div className="welcome-section">
           <div className="role-badge cashier">
@@ -131,7 +152,7 @@ const CashierDashboard = ({ inventory, setActiveView }) => {
           </div>
           <h1>Cashier Dashboard</h1>
           <div className="welcome-banner">
-            <span>Welcome, {getUserDisplayName()}! Ready to serve customers at {userInfo?.storeName || 'your store'}.</span>
+            <span>Welcome, {getUserDisplayName()}! Ready to serve customers at {userInfo?.storeName || 'ABC'}.</span>
           </div>
           <div className="shift-info">
             <Clock size={16} />
@@ -144,6 +165,7 @@ const CashierDashboard = ({ inventory, setActiveView }) => {
             <span className="user-name">{getUserDisplayName()}</span>
             <span className="user-role">Cashier</span>
             <span className="user-email">{currentUser?.email}</span>
+            <span className="user-store">{userInfo?.storeName || 'ABC'}</span>
           </div>
           <button className="logout-btn" onClick={handleLogout}>
             Logout

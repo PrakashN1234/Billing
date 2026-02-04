@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Users, Plus, Edit, Trash2, Mail, Phone, Calendar, X, Save, Eye, EyeOff, ToggleLeft, ToggleRight } from 'lucide-react';
+import { Users, Plus, Edit, Trash2, Mail, Phone, Calendar, X, Save, Eye, EyeOff, ToggleLeft, ToggleRight, Key, Shield } from 'lucide-react';
 import { 
   subscribeToUsers, 
   addUser, 
@@ -17,8 +17,11 @@ const StoreUsersView = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
+  const [changingPasswordUser, setChangingPasswordUser] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -26,6 +29,10 @@ const StoreUsersView = () => {
     role: 'Cashier',
     status: 'Active',
     password: ''
+  });
+  const [passwordData, setPasswordData] = useState({
+    newPassword: '',
+    confirmPassword: ''
   });
 
   useEffect(() => {
@@ -59,6 +66,54 @@ const StoreUsersView = () => {
       password: ''
     });
     setShowPassword(false);
+  };
+
+  const resetPasswordForm = () => {
+    setPasswordData({
+      newPassword: '',
+      confirmPassword: ''
+    });
+    setShowNewPassword(false);
+  };
+
+  const handleChangePassword = (user) => {
+    setChangingPasswordUser(user);
+    resetPasswordForm();
+    setShowPasswordModal(true);
+  };
+
+  const handlePasswordSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (!passwordData.newPassword || !passwordData.confirmPassword) {
+      alert('Please fill in both password fields');
+      return;
+    }
+
+    if (passwordData.newPassword.length < 6) {
+      alert('Password must be at least 6 characters long');
+      return;
+    }
+
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      alert('Passwords do not match');
+      return;
+    }
+
+    try {
+      await updateUser(changingPasswordUser.id, { 
+        password: passwordData.newPassword,
+        passwordChangedAt: new Date().toISOString(),
+        passwordChangedBy: currentUser.email
+      });
+      alert(`Password changed successfully for ${changingPasswordUser.name}`);
+      setShowPasswordModal(false);
+      setChangingPasswordUser(null);
+      resetPasswordForm();
+    } catch (error) {
+      console.error('Error changing password:', error);
+      alert('Error changing password. Please try again.');
+    }
   };
 
   const handleAddUser = () => {
@@ -183,8 +238,21 @@ const StoreUsersView = () => {
     setEditingUser(null);
   };
 
+  const handlePasswordCancel = () => {
+    setShowPasswordModal(false);
+    setChangingPasswordUser(null);
+    resetPasswordForm();
+  };
+
   const handleInputChange = (field, value) => {
     setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const handlePasswordInputChange = (field, value) => {
+    setPasswordData(prev => ({
       ...prev,
       [field]: value
     }));
@@ -219,16 +287,82 @@ const StoreUsersView = () => {
     );
   }
 
+  // Calculate user statistics
+  const cashiers = users.filter(user => {
+    const role = user.role ? user.role.toLowerCase() : '';
+    const email = user.email ? user.email.toLowerCase() : '';
+    
+    // Match various role formats and patterns:
+    // 1. Explicit cashier roles
+    if (role === 'cashier' || role.includes('cashier')) {
+      return true;
+    }
+    
+    // 2. Generic "user" role but email suggests cashier
+    if (role === 'user' && email.includes('cashier')) {
+      return true;
+    }
+    
+    // 3. No specific role but email suggests cashier
+    if (!role && email.includes('cashier')) {
+      return true;
+    }
+    
+    // 4. For legacy users, assume non-admin emails are cashiers
+    if ((role === 'user' || !role) && 
+        !email.includes('admin') && 
+        !email.includes('manager') &&
+        email.includes('@mystore.com')) {
+      return true;
+    }
+    
+    return false;
+  });
+  const activeCashiers = cashiers.filter(user => {
+    const status = user.status ? user.status.toLowerCase() : 'active';
+    return status === 'active';
+  });
+  const inactiveCashiers = cashiers.filter(user => {
+    const status = user.status ? user.status.toLowerCase() : 'active';
+    return status === 'inactive';
+  });
+
+  // Debug logging
+  console.log('👥 Store Users View - Users:', users);
+  console.log('💰 Filtered cashiers:', cashiers);
+  console.log('📊 User statistics:', {
+    total: users.length,
+    cashiers: cashiers.length,
+    active: activeCashiers.length,
+    inactive: inactiveCashiers.length
+  });
+
   return (
     <div className="users-view">
       <div className="view-header">
         <div>
           <h1>Store Users Management</h1>
           <p>Managing users for {userStoreName}</p>
+          <div className="user-stats">
+            <span className="stat-item">
+              <Users size={16} />
+              Total: {users.length}
+            </span>
+            <span className="stat-item">
+              <Shield size={16} />
+              Cashiers: {cashiers.length}
+            </span>
+            <span className="stat-item active">
+              Active: {activeCashiers.length}
+            </span>
+            <span className="stat-item inactive">
+              Inactive: {inactiveCashiers.length}
+            </span>
+          </div>
         </div>
         <button className="btn-primary" onClick={handleAddUser}>
           <Plus size={20} />
-          Add New User
+          Add New Cashier
         </button>
       </div>
 
@@ -308,6 +442,13 @@ const StoreUsersView = () => {
                       <Edit size={16} />
                     </button>
                     <button 
+                      className="btn-icon password"
+                      onClick={() => handleChangePassword(user)}
+                      title="Change Password"
+                    >
+                      <Key size={16} />
+                    </button>
+                    <button 
                       className="btn-icon danger"
                       onClick={() => handleDeleteUser(user.id)}
                       title="Delete User"
@@ -325,7 +466,7 @@ const StoreUsersView = () => {
                     <p>No users found for {userStoreName}</p>
                     <button className="btn-primary" onClick={handleAddUser}>
                       <Plus size={16} />
-                      Add First User
+                      Add First Cashier
                     </button>
                   </div>
                 </td>
@@ -442,6 +583,81 @@ const StoreUsersView = () => {
                 <button type="submit" className="btn-primary">
                   <Save size={16} />
                   {editingUser ? 'Update User' : 'Add User'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Change Password Modal */}
+      {showPasswordModal && changingPasswordUser && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h2>Change Password - {changingPasswordUser.name}</h2>
+              <button className="btn-close" onClick={handlePasswordCancel}>
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handlePasswordSubmit} className="password-form">
+              <div className="form-group">
+                <label htmlFor="newPassword">New Password *</label>
+                <div className="password-input">
+                  <input
+                    type={showNewPassword ? 'text' : 'password'}
+                    id="newPassword"
+                    value={passwordData.newPassword}
+                    onChange={(e) => handlePasswordInputChange('newPassword', e.target.value)}
+                    placeholder="Enter new password (min 6 characters)"
+                    required
+                    minLength={6}
+                  />
+                  <button
+                    type="button"
+                    className="password-toggle"
+                    onClick={() => setShowNewPassword(!showNewPassword)}
+                  >
+                    {showNewPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="confirmPassword">Confirm New Password *</label>
+                <div className="password-input">
+                  <input
+                    type={showNewPassword ? 'text' : 'password'}
+                    id="confirmPassword"
+                    value={passwordData.confirmPassword}
+                    onChange={(e) => handlePasswordInputChange('confirmPassword', e.target.value)}
+                    placeholder="Confirm new password"
+                    required
+                    minLength={6}
+                  />
+                </div>
+              </div>
+
+              <div className="password-info">
+                <div className="info-item">
+                  <strong>User:</strong> {changingPasswordUser.name}
+                </div>
+                <div className="info-item">
+                  <strong>Email:</strong> {changingPasswordUser.email}
+                </div>
+                <div className="info-item">
+                  <strong>Role:</strong> {changingPasswordUser.role}
+                </div>
+              </div>
+
+              <div className="form-actions">
+                <button type="button" className="btn-secondary" onClick={handlePasswordCancel}>
+                  Cancel
+                </button>
+                <button type="submit" className="btn-primary">
+                  <Key size={16} />
+                  Change Password
                 </button>
               </div>
             </form>

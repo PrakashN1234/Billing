@@ -8,9 +8,10 @@ import {
   AlertTriangle,
   UserCheck,
   Activity,
-  QrCode
+  QrCode,
+  Users
 } from 'lucide-react';
-import { getSalesByStore, getAccessibleStores } from '../services/firebaseService';
+import { getSalesByStore, getAccessibleStores, subscribeToUsers } from '../services/firebaseService';
 import { useAuth } from '../contexts/AuthContext';
 import { generateBarcodesForInventory } from '../utils/generateInventoryBarcodes';
 import { generateCodesForInventory } from '../utils/generateProductCodes';
@@ -19,6 +20,7 @@ import { getRoleDisplayName, getUserRole, getUserInfo, getUserStoreId } from '..
 const AdminDashboard = ({ inventory, setActiveView }) => {
   const { currentUser, logout } = useAuth();
   const [sales, setSales] = useState([]);
+  const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     totalProducts: 0,
@@ -28,7 +30,10 @@ const AdminDashboard = ({ inventory, setActiveView }) => {
     productsWithBarcodes: 0,
     productsWithoutBarcodes: 0,
     productsWithCodes: 0,
-    productsWithoutCodes: 0
+    productsWithoutCodes: 0,
+    totalCashiers: 0,
+    activeCashiers: 0,
+    inactiveCashiers: 0
   });
 
   const userInfo = getUserInfo(currentUser?.email);
@@ -56,6 +61,25 @@ const AdminDashboard = ({ inventory, setActiveView }) => {
     }
   }, [userStoreId]);
 
+  // Load users for this store
+  useEffect(() => {
+    const unsubscribe = subscribeToUsers(
+      (usersData) => {
+        // Filter users for this store only
+        const storeUsers = usersData.filter(user => 
+          user.storeId === userStoreId || 
+          (user.email && user.email.includes('@mystore.com')) // Legacy users
+        );
+        setUsers(storeUsers);
+      },
+      (error) => {
+        console.error('Error loading store users:', error);
+      }
+    );
+
+    return () => unsubscribe();
+  }, [userStoreId]);
+
   useEffect(() => {
     loadDashboardData();
     loadStoreData();
@@ -74,6 +98,57 @@ const AdminDashboard = ({ inventory, setActiveView }) => {
     const productsWithoutCodes = storeInventory.length - productsWithCodes;
     const lowStockItems = storeInventory.filter(item => item.stock < 10).length;
     
+    // Debug: Log user data to understand the structure
+    console.log('👥 Users data for stats calculation:', users);
+    console.log('🏪 Current store ID:', userStoreId);
+    
+    // Calculate cashier statistics with more flexible role matching
+    const cashiers = users.filter(user => {
+      const role = user.role ? user.role.toLowerCase() : '';
+      const email = user.email ? user.email.toLowerCase() : '';
+      
+      // Match various role formats and patterns:
+      // 1. Explicit cashier roles
+      if (role === 'cashier' || role.includes('cashier')) {
+        return true;
+      }
+      
+      // 2. Generic "user" role but email suggests cashier
+      if (role === 'user' && email.includes('cashier')) {
+        return true;
+      }
+      
+      // 3. No specific role but email suggests cashier
+      if (!role && email.includes('cashier')) {
+        return true;
+      }
+      
+      // 4. For legacy users, assume non-admin emails are cashiers
+      if ((role === 'user' || !role) && 
+          !email.includes('admin') && 
+          !email.includes('manager') &&
+          email.includes('@mystore.com')) {
+        return true;
+      }
+      
+      return false;
+    });
+    
+    console.log('💰 Filtered cashiers:', cashiers);
+    
+    const activeCashiers = cashiers.filter(user => {
+      const status = user.status ? user.status.toLowerCase() : 'active';
+      return status === 'active';
+    }).length;
+    
+    const inactiveCashiers = cashiers.length - activeCashiers;
+    
+    console.log('📊 Cashier stats:', {
+      total: cashiers.length,
+      active: activeCashiers,
+      inactive: inactiveCashiers
+    });
+    
     const newStats = {
       totalProducts: storeInventory.length,
       totalSales: totalSales,
@@ -82,15 +157,18 @@ const AdminDashboard = ({ inventory, setActiveView }) => {
       productsWithBarcodes,
       productsWithoutBarcodes,
       productsWithCodes,
-      productsWithoutCodes
+      productsWithoutCodes,
+      totalCashiers: cashiers.length,
+      activeCashiers,
+      inactiveCashiers
     };
     
     setStats(newStats);
-  }, [inventory, sales, userStoreId]);
+  }, [inventory, sales, users, userStoreId]);
 
   useEffect(() => {
     updateStats();
-  }, [inventory, sales, updateStats]);
+  }, [inventory, sales, users, updateStats]);
 
   const handleLogout = async () => {
     try {
@@ -225,15 +303,36 @@ const AdminDashboard = ({ inventory, setActiveView }) => {
 
   return (
     <div className="dashboard admin-dashboard">
+      {/* Store Context Header */}
+      <div className="store-context-header">
+        <div className="store-info-card">
+          <div className="store-icon">
+            <Package size={24} />
+          </div>
+          <div className="store-details">
+            <h2>Currently Managing</h2>
+            <h1>{userInfo?.storeName || 'ABC'}</h1>
+            <div className="store-meta">
+              <span className="store-id">Store ID: {userStoreId || 'store_001'}</span>
+              <span className="admin-role">Administrator Access</span>
+            </div>
+          </div>
+          <div className="store-status">
+            <div className="status-indicator active"></div>
+            <span>Active</span>
+          </div>
+        </div>
+      </div>
+
       <div className="dashboard-header">
         <div className="welcome-section">
           <div className="role-badge admin">
             <UserCheck size={16} />
             <span>{getRoleDisplayName(userRole)}</span>
           </div>
-          <h1>Admin Dashboard - {userInfo?.storeName || 'Main Store'}</h1>
+          <h1>Admin Dashboard</h1>
           <div className="welcome-banner">
-            <span>Welcome back, {getUserDisplayName()}! Managing {userInfo?.storeName || 'Main Store'} efficiently.</span>
+            <span>Welcome back, {getUserDisplayName()}! Managing {userInfo?.storeName || 'ABC'} efficiently.</span>
           </div>
         </div>
         <div className="user-profile">
@@ -242,6 +341,7 @@ const AdminDashboard = ({ inventory, setActiveView }) => {
             <span className="user-name">{getUserDisplayName()}</span>
             <span className="user-role">Administrator</span>
             <span className="user-email">{currentUser?.email}</span>
+            <span className="user-store">{userInfo?.storeName || 'ABC'}</span>
           </div>
           <button className="logout-btn" onClick={handleLogout}>
             Logout
@@ -287,6 +387,19 @@ const AdminDashboard = ({ inventory, setActiveView }) => {
           <div className="stat-content">
             <div className="stat-label">LOW STOCK ITEMS</div>
             <div className="stat-value">{stats.lowStockItems}</div>
+          </div>
+        </div>
+
+        <div className="stat-card users">
+          <div className="stat-icon">
+            <Users size={24} />
+          </div>
+          <div className="stat-content">
+            <div className="stat-label">TOTAL CASHIERS</div>
+            <div className="stat-value">{stats.totalCashiers}</div>
+            <div className="stat-detail">
+              {stats.activeCashiers} active, {stats.inactiveCashiers} inactive
+            </div>
           </div>
         </div>
 

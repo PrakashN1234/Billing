@@ -11,7 +11,7 @@ import {
   QrCode
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-import { getNavigationItems, getUserRole, getRoleDisplayName } from '../utils/roleManager';
+import { getNavigationItems, getUserRole, getRoleDisplayName, getUserInfo } from '../utils/roleManager';
 
 const Sidebar = ({ activeView, setActiveView, userEmail }) => {
   const { logout } = useAuth();
@@ -28,6 +28,7 @@ const Sidebar = ({ activeView, setActiveView, userEmail }) => {
   const navigationItems = getNavigationItems(userEmail);
   const userRole = getUserRole(userEmail);
   const roleDisplayName = getRoleDisplayName(userRole);
+  const userInfo = getUserInfo(userEmail);
 
   // Icon mapping
   const iconMap = {
@@ -59,6 +60,9 @@ const Sidebar = ({ activeView, setActiveView, userEmail }) => {
         <div className="user-role-badge">
           <span className={`role-indicator ${userRole}`}>{roleDisplayName}</span>
           <span className="user-name">{getUserDisplayName()}</span>
+          {userInfo?.storeName && userInfo.storeName !== 'Company Admin' && (
+            <span className="store-name">{userInfo.storeName}</span>
+          )}
         </div>
       </div>
 

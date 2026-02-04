@@ -5,7 +5,7 @@ import { Eye, EyeOff, Store, User, Lock } from 'lucide-react';
 import '../utils/testAuth'; // Import test functions
 import './Login.css';
 
-const Login = ({ onLogin }) => {
+const Login = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -37,11 +37,20 @@ const Login = ({ onLogin }) => {
       if (isLogin) {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         console.log('✅ Login successful:', userCredential.user.email);
+        
+        // Small delay to ensure AuthContext processes the change
+        setTimeout(() => {
+          console.log('🔄 Authentication state should be updated');
+        }, 100);
+        
       } else {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         console.log('✅ Account created:', userCredential.user.email);
       }
-      onLogin();
+      
+      // AuthContext will automatically detect the auth state change
+      // No need for onLogin callback
+      
     } catch (error) {
       console.error('❌ Authentication error:', error);
       
@@ -85,12 +94,12 @@ const Login = ({ onLogin }) => {
     setError('');
     try {
       await signInWithEmailAndPassword(auth, 'prakashn1234@gmail.com', 'admin123');
-      onLogin();
+      // AuthContext will handle the state change automatically
     } catch (error) {
       // Try the old demo account as fallback
       try {
         await signInWithEmailAndPassword(auth, 'demo@mystore.com', 'demo123');
-        onLogin();
+        // AuthContext will handle the state change automatically
       } catch (fallbackError) {
         setError('Demo login failed. Please use manual login.');
       }

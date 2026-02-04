@@ -7,7 +7,7 @@ import AdminDashboard from './components/AdminDashboard';
 import CashierDashboard from './components/CashierDashboard';
 import UnauthorizedAccess from './components/UnauthorizedAccess';
 import StoresView from './components/StoresView';
-import UsersView from './components/UsersView';
+import UserManagement from './components/UserManagement';
 import StoreUsersView from './components/StoreUsersView';
 import ReportsView from './components/ReportsView';
 import LowStockView from './components/LowStockView';
@@ -20,7 +20,14 @@ import BarcodeTestPage from './components/BarcodeTestPage';
 import LoadingSpinner from './components/LoadingSpinner';
 import { subscribeToInventoryByStore } from './services/firebaseService';
 import { initializeInventory, updateExistingProductCodes } from './utils/initializeData';
-import { isUserAuthorized, getUserRole, canAccessView, USER_ROLES, getUserStoreId, isSuperAdmin, hasPermission } from './utils/roleManager';
+import { 
+  initializeDefaultUsers, 
+  isUserAuthorized, 
+  getUserRole, 
+  getUserStoreId, 
+  isSuperAdmin,
+  USER_ROLES 
+} from './utils/dynamicRoleManager';
 import './App.css';
 
 const MainApp = () => {
@@ -31,13 +38,45 @@ const MainApp = () => {
   const [error, setError] = useState(null);
   const [isInitializing, setIsInitializing] = useState(false);
   const [activeView, setActiveView] = useState('dashboard');
+  const [userAuthorized, setUserAuthorized] = useState(null); // null = checking, true = authorized, false = not authorized
+  const [userRole, setUserRole] = useState(null);
+  const [userStoreId, setUserStoreId] = useState(null);
+  const [isSuper, setIsSuper] = useState(false);
+
+  // Check user authorization when currentUser changes
+  useEffect(() => {
+    const checkUserAuth = async () => {
+      if (!currentUser) {
+        setUserAuthorized(false);
+        return;
+      }
+
+      try {
+        const authorized = await isUserAuthorized(currentUser.email);
+        const role = await getUserRole(currentUser.email);
+        const storeId = await getUserStoreId(currentUser.email);
+        const superAdmin = await isSuperAdmin(currentUser.email);
+
+        setUserAuthorized(authorized);
+        setUserRole(role);
+        setUserStoreId(storeId);
+        setIsSuper(superAdmin);
+      } catch (error) {
+        console.error('Error checking user authorization:', error);
+        setUserAuthorized(false);
+      }
+    };
+
+    checkUserAuth();
+  }, [currentUser]);
 
   useEffect(() => {
-    if (!currentUser) return;
+    if (!currentUser || userAuthorized === null) return;
+    
+    // Initialize default users in database
+    initializeDefaultUsers();
     
     let unsubscribe;
-    const userStoreId = getUserStoreId(currentUser.email);
-    const isSuper = isSuperAdmin(currentUser.email);
     
     const setupInventory = async () => {
       try {
@@ -78,7 +117,7 @@ const MainApp = () => {
     return () => {
       if (unsubscribe) unsubscribe();
     };
-  }, [isInitializing, currentUser]);
+  }, [isInitializing, currentUser, userAuthorized, isSuper, userStoreId]);
 
   const addToCart = (product) => {
     if (product.stock <= 0) {
@@ -121,8 +160,17 @@ const MainApp = () => {
     return <Login />;
   }
 
+  // Show loading while checking authorization
+  if (userAuthorized === null) {
+    return (
+      <LoadingSpinner 
+        message="Checking authorization..." 
+      />
+    );
+  }
+
   // Check if user is authorized
-  if (!isUserAuthorized(currentUser.email)) {
+  if (!userAuthorized) {
     return <UnauthorizedAccess />;
   }
 
@@ -304,26 +352,21 @@ const MainApp = () => {
   }
 
   const renderActiveView = () => {
-    const userRole = getUserRole(currentUser.email);
+    // Check if user can access the current view (we'll handle this synchronously with state)
+    // For now, we'll trust the userRole state that was set during authorization
     
-    // Check if user can access the current view
-    if (!canAccessView(currentUser.email, activeView)) {
-      setActiveView('dashboard'); // Redirect to dashboard if no access
-      return renderDashboard(userRole);
-    }
-
     switch (activeView) {
       case 'dashboard':
         return renderDashboard(userRole);
       case 'stores':
         return <StoresView />;
       case 'users':
-        return <UsersView />;
+        return <UserManagement />;
       case 'store-users':
         return <StoreUsersView />;
       case 'inventory':
         // Show different inventory views based on user role
-        if (hasPermission(currentUser.email, 'manage_inventory')) {
+        if (userRole === USER_ROLES.ADMIN || userRole === USER_ROLES.SUPER_ADMIN) {
           // Admins and Super Admins can manage inventory
           return <AdminPanel inventory={inventory} onClose={() => setActiveView('dashboard')} />;
         } else {

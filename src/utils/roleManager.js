@@ -56,22 +56,79 @@ export const AUTHORIZED_USERS = {
   
   
   // Store Admins (Store Level - Access to specific store only)
+  
+  // ABC Store (Store 1)
   'admin@mystore.com': { 
     role: USER_ROLES.ADMIN, 
     storeId: 'store_001', 
-    storeName: 'Main Store'
+    storeName: 'ABC'
   },
   'manager@mystore.com': { 
     role: USER_ROLES.ADMIN, 
     storeId: 'store_001', 
-    storeName: 'Main Store'
+    storeName: 'ABC'
+  },
+  
+  // XYZ Store (Store 2)
+  'admin@branch1.com': { 
+    role: USER_ROLES.ADMIN, 
+    storeId: 'store_002', 
+    storeName: 'XYZ Store'
+  },
+  'manager@branch1.com': { 
+    role: USER_ROLES.ADMIN, 
+    storeId: 'store_002', 
+    storeName: 'XYZ Store'
+  },
+  
+  // PQR Store (Store 3)
+  'admin@branch2.com': { 
+    role: USER_ROLES.ADMIN, 
+    storeId: 'store_003', 
+    storeName: 'PQR Store'
+  },
+  'manager@branch2.com': { 
+    role: USER_ROLES.ADMIN, 
+    storeId: 'store_003', 
+    storeName: 'PQR Store'
   },
   
   // Cashiers (Store Level - Access to specific store only)
+  
+  // ABC Store Cashiers
   'cashier@mystore.com': { 
     role: USER_ROLES.CASHIER, 
     storeId: 'store_001', 
-    storeName: 'Main Store'
+    storeName: 'ABC'
+  },
+  'cashier1@mystore.com': { 
+    role: USER_ROLES.CASHIER, 
+    storeId: 'store_001', 
+    storeName: 'ABC'
+  },
+  
+  // XYZ Store Cashiers
+  'cashier@xyzstore.com': { 
+    role: USER_ROLES.CASHIER, 
+    storeId: 'store_002', 
+    storeName: 'XYZ Store'
+  },
+  'cashier1@xyzstore.com': { 
+    role: USER_ROLES.CASHIER, 
+    storeId: 'store_002', 
+    storeName: 'XYZ Store'
+  },
+  
+  // PQR Store Cashiers
+  'cashier@pqrstore.com': { 
+    role: USER_ROLES.CASHIER, 
+    storeId: 'store_003', 
+    storeName: 'PQR Store'
+  },
+  'cashier1@pqrstore.com': { 
+    role: USER_ROLES.CASHIER, 
+    storeId: 'store_003', 
+    storeName: 'PQR Store'
   },
   
 };
@@ -302,8 +359,8 @@ export const getWelcomeMessage = (email) => {
   
   const messages = {
     [USER_ROLES.SUPER_ADMIN]: `Welcome back, ${name}! You have full system access across all stores.`,
-    [USER_ROLES.ADMIN]: `Welcome back, ${name}! Managing ${userInfo.storeName} efficiently.`,
-    [USER_ROLES.CASHIER]: `Welcome, ${name}! Ready to serve customers at ${userInfo.storeName}.`
+    [USER_ROLES.ADMIN]: `Welcome back, ${name}! You are managing ${userInfo.storeName} (${userInfo.storeId}).`,
+    [USER_ROLES.CASHIER]: `Welcome, ${name}! You are working at ${userInfo.storeName} (${userInfo.storeId}).`
   };
   
   return messages[userInfo.role] || `Welcome, ${name}!`;

@@ -9,13 +9,14 @@ import {
 } from 'lucide-react';
 import { subscribeToStores, subscribeToUsers } from '../services/firebaseService';
 import { useAuth } from '../contexts/AuthContext';
-import { getRoleDisplayName, getUserRole } from '../utils/roleManager';
+import { getRoleDisplayName, getUserInfoFromDB } from '../utils/dynamicRoleManager';
 
 const SuperAdminDashboard = ({ setActiveView }) => {
   const { currentUser, logout } = useAuth();
   const [stores, setStores] = useState([]);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [userInfo, setUserInfo] = useState(null);
   const [stats, setStats] = useState({
     totalStores: 0,
     totalUsers: 0,
@@ -23,7 +24,16 @@ const SuperAdminDashboard = ({ setActiveView }) => {
     activeUsers: 0
   });
 
-  const userRole = getUserRole(currentUser?.email);
+  // Get user info from database
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      if (currentUser?.email) {
+        const info = await getUserInfoFromDB(currentUser.email);
+        setUserInfo(info);
+      }
+    };
+    fetchUserInfo();
+  }, [currentUser]);
 
   useEffect(() => {
     const unsubscribeStores = subscribeToStores(
@@ -113,6 +123,9 @@ const SuperAdminDashboard = ({ setActiveView }) => {
   ];
 
   const getUserDisplayName = () => {
+    if (userInfo?.name) {
+      return userInfo.name;
+    }
     if (currentUser?.email) {
       return currentUser.email.split('@')[0];
     }
@@ -136,7 +149,7 @@ const SuperAdminDashboard = ({ setActiveView }) => {
         <div className="welcome-section">
           <div className="role-badge super-admin">
             <Shield size={16} />
-            <span>{getRoleDisplayName(userRole)}</span>
+            <span>{userInfo ? getRoleDisplayName(userInfo.role) : 'Loading...'}</span>
           </div>
           <h1>Super Admin Dashboard</h1>
           <div className="welcome-banner">
