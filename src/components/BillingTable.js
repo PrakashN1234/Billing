@@ -51,6 +51,21 @@ const BillingTable = ({ cart, inventory, updateQty, removeItem, clearCart, addTo
       return;
     }
 
+    console.log('🔍 Searching for code:', searchCode.trim());
+    console.log('📦 Total inventory items:', inventory.length);
+    
+    // Log first few products to see their structure
+    if (inventory.length > 0) {
+      console.log('📋 Sample product structure:', {
+        name: inventory[0].name,
+        hasQRCode: !!inventory[0].qrcode,
+        qrcode: inventory[0].qrcode,
+        hasBarcode: !!inventory[0].barcode,
+        barcode: inventory[0].barcode,
+        code: inventory[0].code
+      });
+    }
+
     // Search by QR code first, then barcode, then product code, then ID, then name
     const product = inventory.find(p => 
       p.qrcode === searchCode.trim() ||
@@ -70,7 +85,8 @@ const BillingTable = ({ cart, inventory, updateQty, removeItem, clearCart, addTo
       }
     } else {
       console.log('❌ Product not found for code:', searchCode);
-      alert(`Product not found! Please check the QR code, barcode, or product code: ${searchCode}`);
+      console.log('💡 Tip: Make sure to generate QR codes for products in Admin Dashboard');
+      alert(`Product not found! Please check the barcode or product code.\n\nScanned: ${searchCode}\n\nTip: Generate QR codes from Admin Dashboard if not done yet.`);
     }
   };
 
