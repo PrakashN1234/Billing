@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Camera, X, CheckCircle, AlertCircle, Keyboard, Zap, QrCode } from 'lucide-react';
 import { BrowserMultiFormatReader } from '@zxing/browser';
 
-const QRCodeScannerNew = ({ onScan, onClose, isActive }) => {
+const QRCodeScannerNew = ({ onScan, onClose, isActive, storeSettings = {} }) => {
   const [manualCode, setManualCode] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [recentScans, setRecentScans] = useState([]);
@@ -13,6 +13,15 @@ const QRCodeScannerNew = ({ onScan, onClose, isActive }) => {
   const inputRef = useRef(null);
   const videoRef = useRef(null);
   const codeReaderRef = useRef(null);
+
+  // Check scanning permissions from store settings
+  const canScanQRCode = storeSettings.enableQRCodeScanning !== false;
+  const canScanBarcode = storeSettings.enableBarcodeScanning !== false;
+  const canManualEntry = storeSettings.enableManualEntry !== false;
+  const preferredMethod = storeSettings.preferredScanningMethod || 'qrcode';
+
+  // Determine if camera should be available
+  const cameraAvailable = canScanQRCode || canScanBarcode;
 
   useEffect(() => {
     if (isActive && inputRef.current) {
@@ -185,11 +194,34 @@ const QRCodeScannerNew = ({ onScan, onClose, isActive }) => {
               <h4>Camera Scanner</h4>
             </div>
 
-            {!isCameraActive && !cameraError && (
+            {!cameraAvailable && (
+              <div className="camera-disabled">
+                <AlertCircle size={32} />
+                <h4>Camera Scanning Disabled</h4>
+                <p>The store administrator has disabled camera scanning.</p>
+                <div className="disabled-info">
+                  <p><strong>Current Settings:</strong></p>
+                  <ul>
+                    <li>QR Code Scanning: {canScanQRCode ? '✅ Enabled' : '❌ Disabled'}</li>
+                    <li>Barcode Scanning: {canScanBarcode ? '✅ Enabled' : '❌ Disabled'}</li>
+                    <li>Manual Entry: {canManualEntry ? '✅ Enabled' : '❌ Disabled'}</li>
+                  </ul>
+                  <p className="info-note">Please use manual entry below or contact your administrator.</p>
+                </div>
+              </div>
+            )}
+
+            {cameraAvailable && !isCameraActive && !cameraError && (
               <div className="camera-start">
                 <div className="start-content">
                   <QrCode size={48} />
-                  <p>Scan QR codes with your camera for quick product entry</p>
+                  <p>Scan {canScanQRCode && canScanBarcode ? 'QR codes or barcodes' : canScanQRCode ? 'QR codes' : 'barcodes'} with your camera</p>
+                  {preferredMethod === 'barcode' && (
+                    <p className="preference-note">📊 Barcode scanning is preferred for this store</p>
+                  )}
+                  {preferredMethod === 'qrcode' && (
+                    <p className="preference-note">📱 QR code scanning is preferred for this store</p>
+                  )}
                   <button onClick={startCamera} className="start-camera-btn">
                     <Camera size={16} />
                     Start Camera
@@ -252,54 +284,70 @@ const QRCodeScannerNew = ({ onScan, onClose, isActive }) => {
               <h4>Manual Entry</h4>
             </div>
             
-            <div className="input-group">
-              <input
-                ref={inputRef}
-                type="text"
-                value={manualCode}
-                onChange={(e) => setManualCode(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder="Type QR code, barcode, or product code..."
-                className="main-input"
-                disabled={isSubmitting}
-              />
-              <button
-                onClick={handleManualSubmit}
-                className="submit-btn"
-                disabled={!manualCode.trim() || isSubmitting}
-              >
-                {isSubmitting ? (
-                  <>
-                    <div className="spinner"></div>
-                    Adding...
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle size={16} />
-                    Add Product
-                  </>
-                )}
-              </button>
-            </div>
+            {!canManualEntry && (
+              <div className="manual-disabled">
+                <AlertCircle size={24} />
+                <p>Manual code entry has been disabled by your administrator.</p>
+                <p>Please use the camera scanner above.</p>
+              </div>
+            )}
 
-            <div className="input-tips">
-              <div className="tip-row">
-                <span className="tip-icon">🔢</span>
-                <span>QR code data (e.g., ST001_GRAIN_000123)</span>
-              </div>
-              <div className="tip-row">
-                <span className="tip-icon">📊</span>
-                <span>Barcode (e.g., RICE_000001)</span>
-              </div>
-              <div className="tip-row">
-                <span className="tip-icon">🏷️</span>
-                <span>Product codes (e.g., RICE001, MILK001)</span>
-              </div>
-              <div className="tip-row">
-                <span className="tip-icon">🔍</span>
-                <span>Product names (e.g., "rice", "milk")</span>
-              </div>
-            </div>
+            {canManualEntry && (
+              <>
+                <div className="input-group">
+                  <input
+                    ref={inputRef}
+                    type="text"
+                    value={manualCode}
+                    onChange={(e) => setManualCode(e.target.value)}
+                    onKeyPress={handleKeyPress}
+                    placeholder={`Type ${canScanQRCode && canScanBarcode ? 'QR code, barcode, or product code' : canScanQRCode ? 'QR code or product code' : 'barcode or product code'}...`}
+                    className="main-input"
+                    disabled={isSubmitting}
+                  />
+                  <button
+                    onClick={handleManualSubmit}
+                    className="submit-btn"
+                    disabled={!manualCode.trim() || isSubmitting}
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <div className="spinner"></div>
+                        Adding...
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle size={16} />
+                        Add Product
+                      </>
+                    )}
+                  </button>
+                </div>
+
+                <div className="input-tips">
+                  {canScanQRCode && (
+                    <div className="tip-row">
+                      <span className="tip-icon">🔢</span>
+                      <span>QR code data (e.g., RICE001, MILK001)</span>
+                    </div>
+                  )}
+                  {canScanBarcode && (
+                    <div className="tip-row">
+                      <span className="tip-icon">📊</span>
+                      <span>Barcode (e.g., RICE001, MILK001)</span>
+                    </div>
+                  )}
+                  <div className="tip-row">
+                    <span className="tip-icon">🏷️</span>
+                    <span>Product codes (e.g., RICE001, MILK001)</span>
+                  </div>
+                  <div className="tip-row">
+                    <span className="tip-icon">🔍</span>
+                    <span>Product names (e.g., "rice", "milk")</span>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
 
           {/* Quick Access Codes */}

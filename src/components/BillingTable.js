@@ -473,6 +473,7 @@ const BillingTable = ({ cart, inventory, updateQty, removeItem, clearCart, addTo
       {/* QR Code Scanner - New ZXing Implementation */}
       <QRCodeScannerNew 
         isActive={scannerActive}
+        storeSettings={storeSettings}
         onScan={(code) => {
           console.log('QR Code scanned in BillingTable:', code);
           handleFetchProduct(code);
