@@ -10881,3 +10881,29 @@ body {
     height: 200px;
   }
 }
+
+/* Sync Codes Button */
+.sync-btn {
+  background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%) !important;
+  color: white !important;
+  font-weight: 600 !important;
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3) !important;
+}
+
+.sync-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(139, 92, 246, 0.4) !important;
+}
+
+.barcode-alert.success {
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  border: 2px solid #22c55e;
+}
+
+.barcode-alert.success .alert-header {
+  color: #15803d;
+}
+
+.barcode-alert.success .barcode-info p {
+  color: #166534;
+}

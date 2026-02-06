@@ -16,6 +16,7 @@ import { getSalesByStore, getAccessibleStores, subscribeToUsers } from '../servi
 import { useAuth } from '../contexts/AuthContext';
 import { generateQRCodesForInventory } from '../utils/generateInventoryQRCodes';
 import { generateCodesForInventory } from '../utils/generateProductCodes';
+import { syncAllProductCodes, autoGenerateMissingCodes } from '../utils/syncProductCodes';
 import { getRoleDisplayName, getUserRole, getUserInfo, getUserStoreId } from '../utils/roleManager';
 
 const AdminDashboard = ({ inventory, setActiveView }) => {
@@ -208,8 +209,69 @@ const AdminDashboard = ({ inventory, setActiveView }) => {
       case 'generate-qrcodes':
         await handleGenerateAllQRCodes();
         break;
+      case 'sync-codes':
+        await handleSyncAllCodes();
+        break;
+      case 'auto-generate':
+        await handleAutoGenerateCodes();
+        break;
       default:
         console.log('Unknown action:', actionId);
+    }
+  };
+
+  const handleSyncAllCodes = async () => {
+    const confirmed = window.confirm(
+      `Sync all products to have matching code, barcode, and QR code?\n\nThis will set barcode = code and qrcode = code for all products.`
+    );
+    
+    if (!confirmed) return;
+
+    try {
+      setLoading(true);
+      const result = await syncAllProductCodes();
+      
+      if (result.success) {
+        alert(`Success! Synced ${result.updated} products.\n\nAll products now have matching codes.`);
+      } else {
+        alert(`Error: ${result.message}`);
+      }
+    } catch (error) {
+      console.error('Error syncing codes:', error);
+      alert('Failed to sync codes. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAutoGenerateCodes = async () => {
+    const itemsWithoutCodes = inventory.filter(item => !item.code);
+    
+    if (itemsWithoutCodes.length === 0) {
+      alert('All products already have codes!');
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `Auto-generate codes for ${itemsWithoutCodes.length} products?\n\nThis will create product codes, barcodes, and QR codes automatically.`
+    );
+    
+    if (!confirmed) return;
+
+    try {
+      setLoading(true);
+      const result = await autoGenerateMissingCodes();
+      
+      if (result.success) {
+        alert(`Success! Generated codes for ${result.generated} products.`);
+      } else {
+        alert(`Error: ${result.message}`);
+      }
+    } catch (error) {
+      console.error('Error auto-generating codes:', error);
+      alert('Failed to auto-generate codes. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -467,39 +529,68 @@ const AdminDashboard = ({ inventory, setActiveView }) => {
           <div className="barcode-alert">
             <div className="alert-header">
               <BarChart3 size={20} />
-              <span>Product Management</span>
+              <span>Product Code Management</span>
             </div>
             <div className="barcode-info">
               {stats.productsWithoutCodes > 0 && (
-                <p>{stats.productsWithoutCodes} products need product codes</p>
+                <p>⚠️ {stats.productsWithoutCodes} products need product codes</p>
               )}
               {stats.productsWithoutQRCodes > 0 && (
-                <p>{stats.productsWithoutQRCodes} products need QR codes</p>
+                <p>⚠️ {stats.productsWithoutQRCodes} products need QR codes</p>
               )}
-              <p>Generate codes and QR codes for better inventory management</p>
+              <p>💡 Tip: Use "Sync All Codes" to ensure barcode = qrcode = product code</p>
             </div>
             <div className="barcode-actions">
               {stats.productsWithoutCodes > 0 && (
                 <button 
                   className="generate-all-btn"
-                  onClick={() => handleQuickAction('generate-codes')}
+                  onClick={() => handleQuickAction('auto-generate')}
+                  title="Auto-generate codes for products missing them"
                 >
-                  Generate Product Codes
+                  🔄 Auto-Generate Codes
                 </button>
               )}
-              {stats.productsWithoutQRCodes > 0 && (
-                <button 
-                  className="generate-all-btn"
-                  onClick={() => handleQuickAction('generate-qrcodes')}
-                >
-                  Generate QR Codes
-                </button>
-              )}
+              <button 
+                className="generate-all-btn sync-btn"
+                onClick={() => handleQuickAction('sync-codes')}
+                title="Sync all products: barcode = qrcode = product code"
+              >
+                ✨ Sync All Codes
+              </button>
               <button 
                 className="manage-btn"
                 onClick={() => setActiveView('barcode')}
               >
-                Manage Barcodes
+                📊 Manage Barcodes
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Always show sync option if there are products */}
+        {stats.totalProducts > 0 && stats.productsWithoutCodes === 0 && stats.productsWithoutQRCodes === 0 && (
+          <div className="barcode-alert success">
+            <div className="alert-header">
+              <BarChart3 size={20} />
+              <span>All Products Have Codes ✅</span>
+            </div>
+            <div className="barcode-info">
+              <p>All {stats.totalProducts} products have product codes, barcodes, and QR codes</p>
+              <p>💡 Use "Sync All Codes" if you want to ensure they all match</p>
+            </div>
+            <div className="barcode-actions">
+              <button 
+                className="generate-all-btn sync-btn"
+                onClick={() => handleQuickAction('sync-codes')}
+                title="Sync all products: barcode = qrcode = product code"
+              >
+                ✨ Sync All Codes
+              </button>
+              <button 
+                className="manage-btn"
+                onClick={() => setActiveView('barcode')}
+              >
+                📊 View Barcodes
               </button>
             </div>
           </div>
