@@ -10032,3 +10032,732 @@ body {
     gap: 0.75rem;
   }
 }
+
+/* QR Code Scanner Styles */
+.qrcode-scanner-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.qrcode-scanner-modal {
+  background: white;
+  border-radius: var(--border-radius-lg);
+  width: 100%;
+  max-width: 550px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-xl);
+}
+
+.qrcode-scanner-modal .scanner-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--gray-200);
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+}
+
+.qrcode-scanner-modal .header-content {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.qrcode-scanner-modal .header-content h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.qrcode-scanner-modal .scan-success-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--border-radius);
+  font-size: 0.75rem;
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.8); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.qrcode-scanner-modal .close-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: var(--border-radius);
+  color: white;
+  transition: var(--transition);
+}
+
+.qrcode-scanner-modal .close-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.qrcode-scanner-modal .scanner-content {
+  padding: 1.5rem;
+}
+
+/* Camera Scanner Section */
+.qrcode-scanner-modal .camera-scanner-section {
+  margin-bottom: 1.5rem;
+  background: var(--gray-50);
+  padding: 1rem;
+  border-radius: var(--border-radius);
+}
+
+.qrcode-scanner-modal .section-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  color: var(--success);
+}
+
+.qrcode-scanner-modal .section-header h4 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--gray-900);
+}
+
+.qrcode-scanner-modal .camera-start {
+  text-align: center;
+  padding: 2rem 1rem;
+}
+
+.qrcode-scanner-modal .start-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.qrcode-scanner-modal .start-content svg {
+  color: var(--success);
+}
+
+.qrcode-scanner-modal .start-content p {
+  margin: 0;
+  color: var(--gray-600);
+  font-size: 0.875rem;
+}
+
+.qrcode-scanner-modal .start-camera-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--success);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  font-weight: 600;
+  transition: var(--transition);
+}
+
+.qrcode-scanner-modal .start-camera-btn:hover {
+  background: #059669;
+  transform: translateY(-1px);
+}
+
+.qrcode-scanner-modal .camera-error {
+  text-align: center;
+  padding: 1.5rem;
+  color: var(--gray-600);
+}
+
+.qrcode-scanner-modal .camera-error h4 {
+  margin: 0.5rem 0;
+  color: var(--danger);
+}
+
+.qrcode-scanner-modal .error-tips {
+  margin: 1rem 0;
+  text-align: left;
+  background: white;
+  padding: 1rem;
+  border-radius: var(--border-radius);
+}
+
+.qrcode-scanner-modal .error-tips ul {
+  margin: 0.5rem 0 0 1rem;
+  padding: 0;
+}
+
+.qrcode-scanner-modal .error-tips li {
+  margin: 0.25rem 0;
+  font-size: 0.875rem;
+}
+
+.qrcode-scanner-modal .retry-btn {
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  font-weight: 500;
+  transition: var(--transition);
+}
+
+.qrcode-scanner-modal .retry-btn:hover {
+  background: var(--primary-dark);
+}
+
+.qrcode-scanner-modal .camera-active {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.qrcode-scanner-modal .qr-reader {
+  width: 100%;
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  background: var(--gray-900);
+}
+
+.qrcode-scanner-modal .camera-controls {
+  display: flex;
+  justify-content: center;
+}
+
+.qrcode-scanner-modal .stop-camera-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--danger);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  font-weight: 500;
+  transition: var(--transition);
+}
+
+.qrcode-scanner-modal .stop-camera-btn:hover {
+  background: #dc2626;
+}
+
+.qrcode-scanner-modal .scanning-tips {
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--gray-600);
+  padding: 0.5rem;
+  background: white;
+  border-radius: var(--border-radius);
+}
+
+/* Manual Entry Section - Reuse existing styles */
+.qrcode-scanner-modal .manual-entry-section {
+  background: var(--gray-50);
+  padding: 1.5rem;
+  border-radius: var(--border-radius);
+  margin-bottom: 1.5rem;
+}
+
+.qrcode-scanner-modal .input-group {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.qrcode-scanner-modal .main-input {
+  flex: 1;
+  padding: 1rem;
+  border: 2px solid var(--gray-300);
+  border-radius: var(--border-radius);
+  font-size: 1.125rem;
+  transition: var(--transition);
+  background: white;
+}
+
+.qrcode-scanner-modal .main-input:focus {
+  outline: none;
+  border-color: var(--success);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+.qrcode-scanner-modal .submit-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--success);
+  color: white;
+  border: none;
+  padding: 1rem 1.5rem;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: var(--transition);
+  white-space: nowrap;
+  min-width: 140px;
+  justify-content: center;
+}
+
+.qrcode-scanner-modal .submit-btn:hover:not(:disabled) {
+  background: #059669;
+  transform: translateY(-1px);
+}
+
+.qrcode-scanner-modal .submit-btn:disabled {
+  background: var(--gray-400);
+  cursor: not-allowed;
+  transform: none;
+}
+
+.qrcode-scanner-modal .input-tips {
+  background: white;
+  padding: 1rem;
+  border-radius: var(--border-radius);
+  border-left: 3px solid var(--success);
+}
+
+.qrcode-scanner-modal .tip-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.25rem 0;
+  font-size: 0.875rem;
+  color: var(--gray-700);
+}
+
+/* Quick Codes & Recent Scans - Reuse existing styles */
+.qrcode-scanner-modal .quick-codes-section,
+.qrcode-scanner-modal .recent-scans-section {
+  margin-bottom: 1.5rem;
+}
+
+.qrcode-scanner-modal .quick-codes-section h4,
+.qrcode-scanner-modal .recent-scans-section h4 {
+  margin: 0 0 1rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--gray-900);
+}
+
+.qrcode-scanner-modal .quick-codes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 0.75rem;
+}
+
+.qrcode-scanner-modal .quick-code-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.75rem;
+  background: white;
+  border: 2px solid var(--gray-200);
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.qrcode-scanner-modal .quick-code-btn:hover:not(:disabled) {
+  border-color: var(--success);
+  background: rgba(16, 185, 129, 0.05);
+  transform: translateY(-1px);
+}
+
+.qrcode-scanner-modal .quick-code-btn .code {
+  font-weight: 600;
+  font-size: 0.8rem;
+  color: var(--success);
+  margin-bottom: 0.25rem;
+}
+
+.qrcode-scanner-modal .quick-code-btn .label {
+  font-size: 0.75rem;
+  color: var(--gray-600);
+}
+
+.qrcode-scanner-modal .recent-scans-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.qrcode-scanner-modal .recent-scan-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: var(--gray-100);
+  border: 1px solid var(--gray-300);
+  border-radius: var(--border-radius);
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+  transition: var(--transition);
+  font-size: 0.875rem;
+  color: var(--gray-700);
+}
+
+.qrcode-scanner-modal .recent-scan-btn:hover:not(:disabled) {
+  background: var(--success);
+  color: white;
+  border-color: var(--success);
+}
+
+/* Help Section */
+.qrcode-scanner-modal .help-section {
+  border-top: 1px solid var(--gray-200);
+  padding-top: 1.5rem;
+}
+
+.qrcode-scanner-modal .help-section h4 {
+  margin: 0 0 1rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--gray-900);
+}
+
+.qrcode-scanner-modal .help-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.qrcode-scanner-modal .help-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.qrcode-scanner-modal .help-item svg {
+  color: var(--success);
+  flex-shrink: 0;
+  margin-top: 0.125rem;
+}
+
+.qrcode-scanner-modal .help-item strong {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--gray-900);
+  margin-bottom: 0.25rem;
+}
+
+.qrcode-scanner-modal .help-item p {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--gray-600);
+  line-height: 1.4;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .qrcode-scanner-overlay {
+    padding: 0.5rem;
+  }
+  
+  .qrcode-scanner-modal {
+    max-height: 95vh;
+  }
+  
+  .qrcode-scanner-modal .scanner-header,
+  .qrcode-scanner-modal .scanner-content {
+    padding: 1rem;
+  }
+  
+  .qrcode-scanner-modal .input-group {
+    flex-direction: column;
+  }
+  
+  .qrcode-scanner-modal .submit-btn {
+    min-width: auto;
+  }
+  
+  .qrcode-scanner-modal .quick-codes-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* QR Code Display Styles */
+.qrcode-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.qrcode-display.small {
+  padding: 8px;
+}
+
+.qrcode-display.large {
+  padding: 20px;
+}
+
+.qrcode-image-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: white;
+  padding: 8px;
+  border-radius: 4px;
+}
+
+.qrcode-image-container img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+.qrcode-product-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f2937;
+  text-align: center;
+}
+
+.qrcode-value {
+  font-size: 12px;
+  color: #6b7280;
+  font-family: 'Courier New', monospace;
+  text-align: center;
+  word-break: break-all;
+}
+
+.qrcode-controls {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.qrcode-controls .control-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  font-size: 12px;
+  background: #f3f4f6;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.qrcode-controls .control-btn:hover {
+  background: #e5e7eb;
+  border-color: #9ca3af;
+}
+
+.qrcode-placeholder {
+  padding: 20px;
+  text-align: center;
+  color: #9ca3af;
+  font-size: 14px;
+  background: #f9fafb;
+  border-radius: 8px;
+  border: 1px dashed #d1d5db;
+}
+
+/* Barcode Manager - Dual Code Display */
+.products-list .list-header {
+  display: grid;
+  grid-template-columns: 2fr 1.5fr 1.5fr 1fr 1.5fr;
+  gap: 16px;
+  padding: 12px 16px;
+  background: #f9fafb;
+  border-bottom: 2px solid #e5e7eb;
+  font-weight: 600;
+  font-size: 13px;
+  color: #6b7280;
+  text-transform: uppercase;
+}
+
+.products-list .product-row {
+  display: grid;
+  grid-template-columns: 2fr 1.5fr 1.5fr 1fr 1.5fr;
+  gap: 16px;
+  padding: 16px;
+  border-bottom: 1px solid #e5e7eb;
+  align-items: center;
+  transition: background 0.2s;
+}
+
+.products-list .product-row:hover {
+  background: #f9fafb;
+}
+
+.qrcode-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.qrcode-display-small {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px;
+  background: #f9fafb;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+}
+
+.qrcode-text {
+  font-size: 10px;
+  color: #6b7280;
+  font-family: 'Courier New', monospace;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.no-qrcode {
+  font-size: 12px;
+  color: #9ca3af;
+  font-style: italic;
+}
+
+.status-badge.error {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.btn-generate-both {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  font-size: 12px;
+  background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-weight: 500;
+}
+
+.btn-generate-both:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.btn-generate-both:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Barcode Modal - Dual Display */
+.barcode-modal .modal-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 24px;
+}
+
+.barcode-modal .code-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 20px;
+  background: #f9fafb;
+  border-radius: 12px;
+  border: 2px solid #e5e7eb;
+}
+
+.barcode-modal .code-section h4 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.barcode-modal .code-value {
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+  color: #6b7280;
+  background: white;
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+}
+
+/* Store Settings - Scanning Tab */
+.scanning-info-box {
+  margin-top: 24px;
+  padding: 20px;
+  background: linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%);
+  border-radius: 12px;
+  border: 2px solid #3b82f6;
+}
+
+.scanning-info-box h4 {
+  margin: 0 0 12px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.scanning-info-box ul {
+  margin: 0 0 16px 0;
+  padding-left: 20px;
+  list-style: none;
+}
+
+.scanning-info-box ul li {
+  margin-bottom: 8px;
+  font-size: 14px;
+  color: #374151;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.scanning-info-box .info-note {
+  margin: 0;
+  padding: 12px;
+  background: white;
+  border-radius: 8px;
+  border-left: 4px solid #3b82f6;
+  font-size: 13px;
+  color: #4b5563;
+}
+
+.scanning-info-box .info-note strong {
+  color: #1f2937;
+}
+
+/* Barcode Stats - Updated for QR Codes */
+.barcode-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.barcode-stats .stat-card svg {
+  flex-shrink: 0;
+}

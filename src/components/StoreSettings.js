@@ -97,6 +97,7 @@ const StoreSettings = () => {
     { id: 'tax', label: 'Tax & Pricing', icon: Percent },
     { id: 'business', label: 'Business Info', icon: Store },
     { id: 'receipt', label: 'Receipt Settings', icon: FileText },
+    { id: 'scanning', label: 'Scanning Method', icon: Settings },
     { id: 'general', label: 'General', icon: Settings }
   ];
 
@@ -434,6 +435,92 @@ const StoreSettings = () => {
                     <option value="2">2 (₹100.00)</option>
                   </select>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'scanning' && (
+            <div className="settings-section">
+              <h3>Scanning Method Settings</h3>
+              
+              <div className="form-grid">
+                <div className="form-group">
+                  <label htmlFor="preferredScanningMethod">
+                    Preferred Scanning Method for Cashiers
+                  </label>
+                  <select
+                    id="preferredScanningMethod"
+                    value={settings.preferredScanningMethod || 'qrcode'}
+                    onChange={(e) => handleInputChange('preferredScanningMethod', e.target.value)}
+                  >
+                    <option value="qrcode">QR Code (Recommended for Mobile)</option>
+                    <option value="barcode">Barcode (Traditional Scanner)</option>
+                    <option value="both">Both (Allow Either)</option>
+                  </select>
+                  <small className="form-hint">
+                    QR codes work better with mobile phone cameras
+                  </small>
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="enableQRCodeScanning">
+                    Enable QR Code Scanning
+                  </label>
+                  <div className="checkbox-group">
+                    <input
+                      type="checkbox"
+                      id="enableQRCodeScanning"
+                      checked={settings.enableQRCodeScanning !== false}
+                      onChange={(e) => handleInputChange('enableQRCodeScanning', e.target.checked)}
+                    />
+                    <span>Allow cashiers to scan QR codes during billing</span>
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="enableBarcodeScanning">
+                    Enable Barcode Scanning
+                  </label>
+                  <div className="checkbox-group">
+                    <input
+                      type="checkbox"
+                      id="enableBarcodeScanning"
+                      checked={settings.enableBarcodeScanning !== false}
+                      onChange={(e) => handleInputChange('enableBarcodeScanning', e.target.checked)}
+                    />
+                    <span>Allow cashiers to scan traditional barcodes</span>
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="enableManualEntry">
+                    Enable Manual Code Entry
+                  </label>
+                  <div className="checkbox-group">
+                    <input
+                      type="checkbox"
+                      id="enableManualEntry"
+                      checked={settings.enableManualEntry !== false}
+                      onChange={(e) => handleInputChange('enableManualEntry', e.target.checked)}
+                    />
+                    <span>Allow cashiers to manually type product codes</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="scanning-info-box">
+                <h4>Why QR Codes?</h4>
+                <ul>
+                  <li>✅ Better mobile camera compatibility</li>
+                  <li>✅ Faster scanning with smartphones</li>
+                  <li>✅ Works in various lighting conditions</li>
+                  <li>✅ More reliable detection</li>
+                  <li>✅ Can store more information</li>
+                </ul>
+                <p className="info-note">
+                  <strong>Note:</strong> Both barcodes and QR codes will be displayed in inventory. 
+                  This setting controls which method is preferred for cashier billing.
+                </p>
               </div>
             </div>
           )}

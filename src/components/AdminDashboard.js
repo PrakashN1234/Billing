@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import { getSalesByStore, getAccessibleStores, subscribeToUsers } from '../services/firebaseService';
 import { useAuth } from '../contexts/AuthContext';
-import { generateBarcodesForInventory } from '../utils/generateInventoryBarcodes';
+import { generateQRCodesForInventory } from '../utils/generateInventoryQRCodes';
 import { generateCodesForInventory } from '../utils/generateProductCodes';
 import { getRoleDisplayName, getUserRole, getUserInfo, getUserStoreId } from '../utils/roleManager';
 
@@ -28,8 +28,8 @@ const AdminDashboard = ({ inventory, setActiveView }) => {
     totalSales: 0,
     totalBills: 0,
     lowStockItems: 0,
-    productsWithBarcodes: 0,
-    productsWithoutBarcodes: 0,
+    productsWithQRCodes: 0,
+    productsWithoutQRCodes: 0,
     productsWithCodes: 0,
     productsWithoutCodes: 0,
     totalCashiers: 0,
@@ -93,8 +93,8 @@ const AdminDashboard = ({ inventory, setActiveView }) => {
     );
     
     const totalSales = sales.reduce((sum, sale) => sum + sale.total, 0);
-    const productsWithBarcodes = storeInventory.filter(item => item.barcode).length;
-    const productsWithoutBarcodes = storeInventory.length - productsWithBarcodes;
+    const productsWithQRCodes = storeInventory.filter(item => item.qrcode || item.barcode).length;
+    const productsWithoutQRCodes = storeInventory.length - productsWithQRCodes;
     const productsWithCodes = storeInventory.filter(item => item.code).length;
     const productsWithoutCodes = storeInventory.length - productsWithCodes;
     const lowStockItems = storeInventory.filter(item => item.stock < 10).length;
@@ -155,8 +155,8 @@ const AdminDashboard = ({ inventory, setActiveView }) => {
       totalSales: totalSales,
       totalBills: sales.length,
       lowStockItems,
-      productsWithBarcodes,
-      productsWithoutBarcodes,
+      productsWithQRCodes,
+      productsWithoutQRCodes,
       productsWithCodes,
       productsWithoutCodes,
       totalCashiers: cashiers.length,
@@ -205,40 +205,40 @@ const AdminDashboard = ({ inventory, setActiveView }) => {
       case 'generate-codes':
         await handleGenerateAllCodes();
         break;
-      case 'generate-barcodes':
-        await handleGenerateAllBarcodes();
+      case 'generate-qrcodes':
+        await handleGenerateAllQRCodes();
         break;
       default:
         console.log('Unknown action:', actionId);
     }
   };
 
-  const handleGenerateAllBarcodes = async () => {
-    const itemsWithoutBarcodes = inventory.filter(item => !item.barcode);
+  const handleGenerateAllQRCodes = async () => {
+    const itemsWithoutQRCodes = inventory.filter(item => !item.qrcode);
     
-    if (itemsWithoutBarcodes.length === 0) {
-      alert('All products already have barcodes!');
+    if (itemsWithoutQRCodes.length === 0) {
+      alert('All products already have QR codes!');
       return;
     }
 
     const confirmed = window.confirm(
-      `Generate barcodes for ${itemsWithoutBarcodes.length} products without barcodes?`
+      `Generate QR codes for ${itemsWithoutQRCodes.length} products without QR codes?`
     );
     
     if (!confirmed) return;
 
     try {
       setLoading(true);
-      const result = await generateBarcodesForInventory(inventory);
+      const result = await generateQRCodesForInventory(inventory, userStoreId || '001');
       
       if (result.success) {
-        alert(`Success! Generated barcodes for ${result.updated} products.`);
+        alert(`Success! Generated QR codes for ${result.updated} products.`);
       } else {
         alert(`Error: ${result.message}`);
       }
     } catch (error) {
-      console.error('Error generating barcodes:', error);
-      alert('Failed to generate barcodes. Please try again.');
+      console.error('Error generating QR codes:', error);
+      alert('Failed to generate QR codes. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -463,7 +463,7 @@ const AdminDashboard = ({ inventory, setActiveView }) => {
           </div>
         )}
 
-        {(stats.productsWithoutBarcodes > 0 || stats.productsWithoutCodes > 0) && (
+        {(stats.productsWithoutQRCodes > 0 || stats.productsWithoutCodes > 0) && (
           <div className="barcode-alert">
             <div className="alert-header">
               <BarChart3 size={20} />
@@ -473,10 +473,10 @@ const AdminDashboard = ({ inventory, setActiveView }) => {
               {stats.productsWithoutCodes > 0 && (
                 <p>{stats.productsWithoutCodes} products need product codes</p>
               )}
-              {stats.productsWithoutBarcodes > 0 && (
-                <p>{stats.productsWithoutBarcodes} products need barcodes</p>
+              {stats.productsWithoutQRCodes > 0 && (
+                <p>{stats.productsWithoutQRCodes} products need QR codes</p>
               )}
-              <p>Generate codes and barcodes for better inventory management</p>
+              <p>Generate codes and QR codes for better inventory management</p>
             </div>
             <div className="barcode-actions">
               {stats.productsWithoutCodes > 0 && (
@@ -487,12 +487,12 @@ const AdminDashboard = ({ inventory, setActiveView }) => {
                   Generate Product Codes
                 </button>
               )}
-              {stats.productsWithoutBarcodes > 0 && (
+              {stats.productsWithoutQRCodes > 0 && (
                 <button 
                   className="generate-all-btn"
-                  onClick={() => handleQuickAction('generate-barcodes')}
+                  onClick={() => handleQuickAction('generate-qrcodes')}
                 >
-                  Generate Barcodes
+                  Generate QR Codes
                 </button>
               )}
               <button 

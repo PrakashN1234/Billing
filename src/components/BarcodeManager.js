@@ -8,13 +8,19 @@ import {
   Package,
   AlertCircle,
   CheckCircle,
-  X
+  X,
+  QrCode
 } from 'lucide-react';
 import BarcodeDisplay from './BarcodeDisplay';
+import QRCodeDisplay from './QRCodeDisplay';
 import { 
   generateUniqueBarcode,
   parseBarcodeInfo
 } from '../utils/barcodeGenerator';
+import { 
+  generateUniqueQRCode,
+  parseQRCode
+} from '../utils/qrcodeGenerator';
 import { updateProduct } from '../services/firebaseService';
 
 const BarcodeManager = ({ inventory, onClose }) => {
@@ -30,7 +36,9 @@ const BarcodeManager = ({ inventory, onClose }) => {
     const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = filterCategory === 'all' || 
       (filterCategory === 'with-barcode' && item.barcode) ||
-      (filterCategory === 'without-barcode' && !item.barcode);
+      (filterCategory === 'without-barcode' && !item.barcode) ||
+      (filterCategory === 'with-qrcode' && item.qrcode) ||
+      (filterCategory === 'without-qrcode' && !item.qrcode);
     return matchesSearch && matchesCategory;
   });
 
@@ -39,6 +47,9 @@ const BarcodeManager = ({ inventory, onClose }) => {
     total: inventory.length,
     withBarcode: inventory.filter(item => item.barcode).length,
     withoutBarcode: inventory.filter(item => !item.barcode).length,
+    withQRCode: inventory.filter(item => item.qrcode).length,
+    withoutQRCode: inventory.filter(item => !item.qrcode).length,
+    withBoth: inventory.filter(item => item.barcode && item.qrcode).length,
     selected: selectedItems.length
   };
 
@@ -57,14 +68,44 @@ const BarcodeManager = ({ inventory, onClose }) => {
     }
   };
 
+  const handleGenerateSingleQRCode = async (product) => {
+    setIsGenerating(true);
+    try {
+      const qrcode = generateUniqueQRCode(product.name, product.id, inventory, product.storeId || '001');
+      await updateProduct(product.id, { qrcode });
+      alert(`QR Code generated for ${product.name}: ${qrcode}`);
+      // Refresh would happen automatically due to real-time listeners
+    } catch (error) {
+      console.error('Error generating QR code:', error);
+      alert('Failed to generate QR code');
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const handleGenerateBoth = async (product) => {
+    setIsGenerating(true);
+    try {
+      const barcode = generateUniqueBarcode(product.name, product.id, inventory);
+      const qrcode = generateUniqueQRCode(product.name, product.id, inventory, product.storeId || '001');
+      await updateProduct(product.id, { barcode, qrcode });
+      alert(`Barcode and QR Code generated for ${product.name}`);
+    } catch (error) {
+      console.error('Error generating codes:', error);
+      alert('Failed to generate codes');
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
   const handleGenerateBulkBarcodes = async () => {
     if (selectedItems.length === 0) {
-      alert('Please select items to generate barcodes for');
+      alert('Please select items to generate codes for');
       return;
     }
 
     const confirmed = window.confirm(
-      `Generate barcodes for ${selectedItems.length} selected items?`
+      `Generate both barcode and QR code for ${selectedItems.length} selected items?`
     );
     if (!confirmed) return;
 
@@ -72,18 +113,26 @@ const BarcodeManager = ({ inventory, onClose }) => {
     try {
       const updatePromises = selectedItems.map(async (itemId) => {
         const product = inventory.find(p => p.id === itemId);
-        if (product && !product.barcode) {
-          const barcode = generateUniqueBarcode(product.name, product.id, inventory);
-          return updateProduct(product.id, { barcode });
+        if (product) {
+          const updates = {};
+          if (!product.barcode) {
+            updates.barcode = generateUniqueBarcode(product.name, product.id, inventory);
+          }
+          if (!product.qrcode) {
+            updates.qrcode = generateUniqueQRCode(product.name, product.id, inventory, product.storeId || '001');
+          }
+          if (Object.keys(updates).length > 0) {
+            return updateProduct(product.id, updates);
+          }
         }
       });
 
       await Promise.all(updatePromises);
-      alert(`Successfully generated barcodes for ${selectedItems.length} items!`);
+      alert(`Successfully generated codes for ${selectedItems.length} items!`);
       setSelectedItems([]);
     } catch (error) {
-      console.error('Error generating bulk barcodes:', error);
-      alert('Failed to generate some barcodes');
+      console.error('Error generating bulk codes:', error);
+      alert('Failed to generate some codes');
     } finally {
       setIsGenerating(false);
     }
@@ -117,10 +166,10 @@ const BarcodeManager = ({ inventory, onClose }) => {
   };
 
   const handleSelectAll = () => {
-    const itemsWithoutBarcode = filteredInventory
-      .filter(item => !item.barcode)
+    const itemsWithoutCodes = filteredInventory
+      .filter(item => !item.barcode || !item.qrcode)
       .map(item => item.id);
-    setSelectedItems(itemsWithoutBarcode);
+    setSelectedItems(itemsWithoutCodes);
   };
 
   const handleDeselectAll = () => {
@@ -165,8 +214,8 @@ const BarcodeManager = ({ inventory, onClose }) => {
           <div className="header-left">
             <BarChart3 size={24} />
             <div>
-              <h2>Barcode Management</h2>
-              <p>Generate and manage product barcodes</p>
+              <h2>Barcode & QR Code Management</h2>
+              <p>Generate and manage product barcodes and QR codes</p>
             </div>
           </div>
           <button className="close-btn" onClick={onClose}>
@@ -190,15 +239,22 @@ const BarcodeManager = ({ inventory, onClose }) => {
               <span className="stat-label">With Barcode</span>
             </div>
           </div>
-          <div className="stat-card warning">
-            <AlertCircle size={20} />
+          <div className="stat-card success">
+            <QrCode size={20} />
             <div>
-              <span className="stat-number">{stats.withoutBarcode}</span>
-              <span className="stat-label">Without Barcode</span>
+              <span className="stat-number">{stats.withQRCode}</span>
+              <span className="stat-label">With QR Code</span>
             </div>
           </div>
           <div className="stat-card info">
             <CheckCircle size={20} />
+            <div>
+              <span className="stat-number">{stats.withBoth}</span>
+              <span className="stat-label">With Both</span>
+            </div>
+          </div>
+          <div className="stat-card warning">
+            <AlertCircle size={20} />
             <div>
               <span className="stat-number">{stats.selected}</span>
               <span className="stat-label">Selected</span>
@@ -227,6 +283,8 @@ const BarcodeManager = ({ inventory, onClose }) => {
                 <option value="all">All Products</option>
                 <option value="with-barcode">With Barcode</option>
                 <option value="without-barcode">Without Barcode</option>
+                <option value="with-qrcode">With QR Code</option>
+                <option value="without-qrcode">Without QR Code</option>
               </select>
             </div>
           </div>
@@ -235,7 +293,7 @@ const BarcodeManager = ({ inventory, onClose }) => {
             <button 
               className="btn-secondary"
               onClick={handleSelectAll}
-              disabled={filteredInventory.filter(item => !item.barcode).length === 0}
+              disabled={filteredInventory.filter(item => !item.barcode || !item.qrcode).length === 0}
             >
               Select All Missing
             </button>
@@ -252,7 +310,7 @@ const BarcodeManager = ({ inventory, onClose }) => {
               disabled={selectedItems.length === 0 || isGenerating}
             >
               {isGenerating ? <RefreshCw size={16} className="spinning" /> : <BarChart3 size={16} />}
-              Generate Selected ({selectedItems.length})
+              Generate Both ({selectedItems.length})
             </button>
             <button 
               className="btn-export"
@@ -270,6 +328,7 @@ const BarcodeManager = ({ inventory, onClose }) => {
           <div className="list-header">
             <span>Product</span>
             <span>Barcode</span>
+            <span>QR Code</span>
             <span>Status</span>
             <span>Actions</span>
           </div>
@@ -282,7 +341,7 @@ const BarcodeManager = ({ inventory, onClose }) => {
                     type="checkbox"
                     checked={selectedItems.includes(product.id)}
                     onChange={() => handleSelectItem(product.id)}
-                    disabled={!!product.barcode}
+                    disabled={product.barcode && product.qrcode}
                   />
                   <div className="product-details">
                     <span className="product-name">{product.name}</span>
@@ -304,14 +363,30 @@ const BarcodeManager = ({ inventory, onClose }) => {
                   )}
                 </div>
 
+                <div className="qrcode-info">
+                  {product.qrcode ? (
+                    <div className="qrcode-display-small">
+                      <QrCode size={16} />
+                      <span className="qrcode-text">{product.qrcode}</span>
+                    </div>
+                  ) : (
+                    <span className="no-qrcode">No QR code</span>
+                  )}
+                </div>
+
                 <div className="status-info">
-                  {product.barcode ? (
+                  {product.barcode && product.qrcode ? (
                     <span className="status-badge success">
                       <CheckCircle size={14} />
-                      Generated
+                      Both
+                    </span>
+                  ) : product.barcode || product.qrcode ? (
+                    <span className="status-badge warning">
+                      <AlertCircle size={14} />
+                      Partial
                     </span>
                   ) : (
-                    <span className="status-badge warning">
+                    <span className="status-badge error">
                       <AlertCircle size={14} />
                       Missing
                     </span>
@@ -319,30 +394,43 @@ const BarcodeManager = ({ inventory, onClose }) => {
                 </div>
 
                 <div className="action-buttons">
-                  {product.barcode ? (
-                    <>
-                      <button 
-                        className="btn-view"
-                        onClick={() => handleViewBarcode(product)}
-                      >
-                        View
-                      </button>
-                      <button 
-                        className="btn-regenerate"
-                        onClick={() => handleRegenerateBarcode(product)}
-                        disabled={isGenerating}
-                      >
-                        Regenerate
-                      </button>
-                    </>
-                  ) : (
+                  {product.barcode && product.qrcode ? (
                     <button 
-                      className="btn-generate"
-                      onClick={() => handleGenerateSingleBarcode(product)}
-                      disabled={isGenerating}
+                      className="btn-view"
+                      onClick={() => handleViewBarcode(product)}
                     >
-                      Generate
+                      View Both
                     </button>
+                  ) : (
+                    <>
+                      {!product.barcode && (
+                        <button 
+                          className="btn-generate"
+                          onClick={() => handleGenerateSingleBarcode(product)}
+                          disabled={isGenerating}
+                        >
+                          + Barcode
+                        </button>
+                      )}
+                      {!product.qrcode && (
+                        <button 
+                          className="btn-generate"
+                          onClick={() => handleGenerateSingleQRCode(product)}
+                          disabled={isGenerating}
+                        >
+                          + QR
+                        </button>
+                      )}
+                      {!product.barcode && !product.qrcode && (
+                        <button 
+                          className="btn-generate-both"
+                          onClick={() => handleGenerateBoth(product)}
+                          disabled={isGenerating}
+                        >
+                          + Both
+                        </button>
+                      )}
+                    </>
                   )}
                 </div>
               </div>
@@ -350,7 +438,7 @@ const BarcodeManager = ({ inventory, onClose }) => {
           </div>
         </div>
 
-        {/* Barcode Modal */}
+        {/* Barcode & QR Code Modal */}
         {showBarcodeModal && selectedProduct && (
           <div className="barcode-modal-overlay">
             <div className="barcode-modal">
@@ -361,18 +449,36 @@ const BarcodeManager = ({ inventory, onClose }) => {
                 </button>
               </div>
               <div className="modal-content">
-                <BarcodeDisplay 
-                  barcode={selectedProduct.barcode}
-                  productName={selectedProduct.name}
-                  size="large"
-                  showControls={true}
-                />
+                {selectedProduct.barcode && (
+                  <div className="code-section">
+                    <h4>Barcode</h4>
+                    <BarcodeDisplay 
+                      barcode={selectedProduct.barcode}
+                      productName={selectedProduct.name}
+                      size="large"
+                      showControls={true}
+                    />
+                    <p className="code-value">{selectedProduct.barcode}</p>
+                  </div>
+                )}
+                {selectedProduct.qrcode && (
+                  <div className="code-section">
+                    <h4>QR Code</h4>
+                    <QRCodeDisplay 
+                      qrcode={selectedProduct.qrcode}
+                      productName={selectedProduct.name}
+                    />
+                    <p className="code-value">{selectedProduct.qrcode}</p>
+                  </div>
+                )}
                 <div className="barcode-details">
-                  <p><strong>Barcode:</strong> {selectedProduct.barcode}</p>
                   <p><strong>Price:</strong> ₹{selectedProduct.price}</p>
                   <p><strong>Stock:</strong> {selectedProduct.stock} units</p>
-                  {parseBarcodeInfo(selectedProduct.barcode) && (
-                    <p><strong>Category:</strong> {parseBarcodeInfo(selectedProduct.barcode).categoryName}</p>
+                  {selectedProduct.barcode && parseBarcodeInfo(selectedProduct.barcode) && (
+                    <p><strong>Barcode Category:</strong> {parseBarcodeInfo(selectedProduct.barcode).categoryName}</p>
+                  )}
+                  {selectedProduct.qrcode && parseQRCode(selectedProduct.qrcode) && (
+                    <p><strong>QR Category:</strong> {parseQRCode(selectedProduct.qrcode).category}</p>
                   )}
                 </div>
               </div>

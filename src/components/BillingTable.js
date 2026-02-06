@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Trash2, Receipt, AlertCircle, Camera, Package, Printer, Download, FileText, X } from 'lucide-react';
 import { saveSale, updateStock } from '../services/firebaseService';
 import { getStoreSettings, calculateBillTotal, formatCurrency, getTaxDisplayName } from '../services/storeSettingsService';
-import BarcodeScanner from './ModernBarcodeScanner';
+import QRCodeScanner from './QRCodeScanner';
 import { printBill, downloadBill, generatePDF } from '../utils/billGenerator';
 import { useAuth } from '../contexts/AuthContext';
 import { getUserStoreId, getUserStoreName } from '../utils/roleManager';
@@ -51,8 +51,9 @@ const BillingTable = ({ cart, inventory, updateQty, removeItem, clearCart, addTo
       return;
     }
 
-    // Search by barcode first, then by product code, then by ID, then by name
+    // Search by QR code first, then barcode, then product code, then ID, then name
     const product = inventory.find(p => 
+      p.qrcode === searchCode.trim() ||
       p.barcode === searchCode.trim() ||
       p.code === searchCode.trim().toUpperCase() ||
       p.id.toLowerCase() === searchCode.toLowerCase() || 
@@ -69,7 +70,7 @@ const BillingTable = ({ cart, inventory, updateQty, removeItem, clearCart, addTo
       }
     } else {
       console.log('❌ Product not found for code:', searchCode);
-      alert(`Product not found! Please check the barcode or product code: ${searchCode}`);
+      alert(`Product not found! Please check the QR code, barcode, or product code: ${searchCode}`);
     }
   };
 
@@ -454,11 +455,11 @@ const BillingTable = ({ cart, inventory, updateQty, removeItem, clearCart, addTo
         </div>
       )}
 
-      {/* Barcode Scanner */}
-      <BarcodeScanner 
+      {/* QR Code Scanner */}
+      <QRCodeScanner 
         isActive={scannerActive}
         onScan={(code) => {
-          console.log('Barcode scanned in BillingTable:', code);
+          console.log('QR Code scanned in BillingTable:', code);
           handleFetchProduct(code);
           setScannerActive(false);
         }}

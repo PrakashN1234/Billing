@@ -34,7 +34,12 @@ export const DEFAULT_STORE_SETTINGS = {
   printLogo: false,
   enableTaxInvoice: true,
   roundingMethod: 'round', // 'round', 'floor', 'ceil'
-  decimalPlaces: 2
+  decimalPlaces: 2,
+  // Scanning method settings
+  preferredScanningMethod: 'qrcode', // 'qrcode', 'barcode', 'both'
+  enableQRCodeScanning: true,
+  enableBarcodeScanning: true,
+  enableManualEntry: true
 };
 
 /**
