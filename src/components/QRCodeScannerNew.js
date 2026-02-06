@@ -58,10 +58,12 @@ const QRCodeScannerNew = ({ onScan, onClose, isActive, storeSettings = {} }) => 
       setIsCameraActive(true);
 
       // Initialize ZXing code reader
-      codeReaderRef.current = new BrowserMultiFormatReader();
+      if (!codeReaderRef.current) {
+        codeReaderRef.current = new BrowserMultiFormatReader();
+      }
 
-      // Get available video devices
-      const videoInputDevices = await codeReaderRef.current.listVideoInputDevices();
+      // Get available video devices using static method
+      const videoInputDevices = await BrowserMultiFormatReader.listVideoInputDevices();
       
       if (videoInputDevices.length === 0) {
         throw new Error('No camera found on this device');
@@ -75,6 +77,7 @@ const QRCodeScannerNew = ({ onScan, onClose, isActive, storeSettings = {} }) => 
       const selectedDeviceId = backCamera ? backCamera.deviceId : videoInputDevices[0].deviceId;
 
       console.log('📷 Starting camera:', selectedDeviceId);
+      console.log('📷 Available cameras:', videoInputDevices.map(d => d.label));
 
       // Start decoding from video device
       await codeReaderRef.current.decodeFromVideoDevice(
@@ -83,7 +86,7 @@ const QRCodeScannerNew = ({ onScan, onClose, isActive, storeSettings = {} }) => 
         (result, error) => {
           if (result) {
             const scannedCode = result.getText();
-            console.log('✅ QR Code detected:', scannedCode);
+            console.log('✅ Code detected:', scannedCode);
             
             // Prevent duplicate scans
             if (scannedCode !== lastScannedCode) {
@@ -92,7 +95,7 @@ const QRCodeScannerNew = ({ onScan, onClose, isActive, storeSettings = {} }) => 
             }
           }
           
-          // Ignore errors (they happen constantly when no QR code is in view)
+          // Ignore errors (they happen constantly when no code is in view)
           if (error && error.name !== 'NotFoundException') {
             console.warn('Scanner error:', error);
           }
@@ -174,13 +177,6 @@ const QRCodeScannerNew = ({ onScan, onClose, isActive, storeSettings = {} }) => 
     setManualCode(code);
     inputRef.current?.focus();
   };
-
-  const quickCodes = [
-    { code: 'RICE001', label: 'Rice' },
-    { code: 'MILK001', label: 'Milk' },
-    { code: 'BREAD001', label: 'Bread' },
-    { code: 'EGGS001', label: 'Eggs' }
-  ];
 
   if (!isActive) return null;
 
@@ -365,24 +361,6 @@ const QRCodeScannerNew = ({ onScan, onClose, isActive, storeSettings = {} }) => 
                 </div>
               </>
             )}
-          </div>
-
-          {/* Quick Access Codes */}
-          <div className="quick-codes-section">
-            <h4>Quick Access</h4>
-            <div className="quick-codes-grid">
-              {quickCodes.map((item) => (
-                <button
-                  key={item.code}
-                  className="quick-code-btn"
-                  onClick={() => handleRecentScanClick(item.code)}
-                  disabled={isSubmitting}
-                >
-                  <span className="code">{item.code}</span>
-                  <span className="label">{item.label}</span>
-                </button>
-              ))}
-            </div>
           </div>
 
           {/* Recent Scans */}
