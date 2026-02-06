@@ -93,8 +93,10 @@ export const regenerateAllQRCodes = async (inventory, storeId = '001') => {
   }
 };
 
-export default {
+const qrCodeUtils = {
   generateQRCodesForInventory,
   generateQRCodeForItem,
   regenerateAllQRCodes
 };
+
+export default qrCodeUtils;

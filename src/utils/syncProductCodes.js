@@ -218,9 +218,11 @@ export const autoGenerateMissingCodes = async () => {
   }
 };
 
-export default {
+const syncUtils = {
   syncAllProductCodes,
   syncSingleProduct,
   generateProductCodeFromName,
   autoGenerateMissingCodes
 };
+
+export default syncUtils;

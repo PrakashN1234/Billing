@@ -53,6 +53,7 @@ const getCategoryPrefix = (productName) => {
 };
 
 // Generate category code based on product name
+// eslint-disable-next-line no-unused-vars
 const getCategoryCode = (productName) => {
   const name = productName.toLowerCase();
   
@@ -82,6 +83,7 @@ const getCategoryCode = (productName) => {
 };
 
 // Generate 6-digit product sequence from product ID
+// eslint-disable-next-line no-unused-vars
 const generateProductSequence = (productId) => {
   let sequence = '';
   
@@ -232,7 +234,7 @@ export const parseQRCode = (qrData) => {
   };
 };
 
-export default {
+const qrCodeGenerator = {
   generateProductQRData,
   generateQRCodeImage,
   generateQRCodeSVG,
@@ -240,3 +242,5 @@ export default {
   validateQRCode,
   parseQRCode
 };
+
+export default qrCodeGenerator;

@@ -141,25 +141,6 @@ const BarcodeManager = ({ inventory, onClose }) => {
     }
   };
 
-  const handleRegenerateBarcode = async (product) => {
-    const confirmed = window.confirm(
-      `Regenerate barcode for ${product.name}? This will replace the existing barcode.`
-    );
-    if (!confirmed) return;
-
-    setIsGenerating(true);
-    try {
-      const barcode = generateUniqueBarcode(product.name, product.id, inventory);
-      await updateProduct(product.id, { barcode });
-      alert(`New barcode generated for ${product.name}: ${barcode}`);
-    } catch (error) {
-      console.error('Error regenerating barcode:', error);
-      alert('Failed to regenerate barcode');
-    } finally {
-      setIsGenerating(false);
-    }
-  };
-
   const handleSelectItem = (itemId) => {
     setSelectedItems(prev => 
       prev.includes(itemId) 
