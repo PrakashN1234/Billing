@@ -15,13 +15,30 @@ const QRCodeScannerNew = ({ onScan, onClose, isActive, storeSettings = {} }) => 
   const codeReaderRef = useRef(null);
 
   // Check scanning permissions from store settings
-  const canScanQRCode = storeSettings.enableQRCodeScanning !== false;
-  const canScanBarcode = storeSettings.enableBarcodeScanning !== false;
-  const canManualEntry = storeSettings.enableManualEntry !== false;
+  // If setting exists, use its value; otherwise default to true
+  const canScanQRCode = storeSettings.hasOwnProperty('enableQRCodeScanning') 
+    ? storeSettings.enableQRCodeScanning === true 
+    : true;
+  const canScanBarcode = storeSettings.hasOwnProperty('enableBarcodeScanning')
+    ? storeSettings.enableBarcodeScanning === true
+    : true;
+  const canManualEntry = storeSettings.hasOwnProperty('enableManualEntry')
+    ? storeSettings.enableManualEntry === true
+    : true;
   const preferredMethod = storeSettings.preferredScanningMethod || 'qrcode';
 
   // Determine if camera should be available
   const cameraAvailable = canScanQRCode || canScanBarcode;
+
+  // Debug logging
+  useEffect(() => {
+    console.log('📋 Store Settings:', storeSettings);
+    console.log('✅ Can Scan QR Code:', canScanQRCode);
+    console.log('✅ Can Scan Barcode:', canScanBarcode);
+    console.log('✅ Can Manual Entry:', canManualEntry);
+    console.log('📱 Preferred Method:', preferredMethod);
+    console.log('📷 Camera Available:', cameraAvailable);
+  }, [storeSettings, canScanQRCode, canScanBarcode, canManualEntry, preferredMethod, cameraAvailable]);
 
   useEffect(() => {
     if (isActive && inputRef.current) {
