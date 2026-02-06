@@ -211,19 +211,57 @@ export const isBarcodeUnique = (barcode, inventory, excludeId = null) => {
 };
 
 // Generate unique barcode ensuring no duplicates
-export const generateUniqueBarcode = (productName, productId, inventory) => {
-  let barcode = generateProductBarcode(productName, productId);
-  let attempts = 0;
+// NEW: Simply use the product code as the barcode
+export const generateUniqueBarcode = (productName, productId, inventory, productCode = null) => {
+  // If product has a code, use it directly as barcode
+  if (productCode) {
+    return productCode;
+  }
   
-  // If barcode exists, modify the product sequence until unique
-  while (!isBarcodeUnique(barcode, inventory, productId) && attempts < 100) {
-    const randomSuffix = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-    const modifiedSequence = (productId + randomSuffix).slice(-6).padStart(6, '0');
-    const baseBarcode = barcode.slice(0, 4) + modifiedSequence;
-    const checkDigit = calculateCheckDigit(baseBarcode);
-    barcode = baseBarcode + checkDigit;
-    attempts++;
+  // If no product code, generate a simple one based on product name
+  const categoryPrefix = getCategoryPrefix(productName);
+  let sequence = 1;
+  let barcode = `${categoryPrefix}${String(sequence).padStart(3, '0')}`;
+  
+  // Ensure uniqueness
+  while (!isBarcodeUnique(barcode, inventory, productId) && sequence < 999) {
+    sequence++;
+    barcode = `${categoryPrefix}${String(sequence).padStart(3, '0')}`;
   }
   
   return barcode;
+};
+
+// Get simple category prefix for product code generation
+const getCategoryPrefix = (productName) => {
+  const name = productName.toLowerCase();
+  
+  // Food & Beverages
+  if (name.includes('rice')) return 'RICE';
+  if (name.includes('wheat')) return 'WHEAT';
+  if (name.includes('flour')) return 'FLOUR';
+  if (name.includes('oil')) return 'OIL';
+  if (name.includes('ghee')) return 'GHEE';
+  if (name.includes('butter')) return 'BUTTER';
+  if (name.includes('sugar')) return 'SUGAR';
+  if (name.includes('salt')) return 'SALT';
+  if (name.includes('milk')) return 'MILK';
+  if (name.includes('bread')) return 'BREAD';
+  if (name.includes('biscuit')) return 'BISCUIT';
+  if (name.includes('tea')) return 'TEA';
+  if (name.includes('coffee')) return 'COFFEE';
+  if (name.includes('juice')) return 'JUICE';
+  if (name.includes('egg')) return 'EGGS';
+  
+  // Personal Care
+  if (name.includes('soap')) return 'SOAP';
+  if (name.includes('shampoo')) return 'SHAMPOO';
+  if (name.includes('toothpaste')) return 'PASTE';
+  
+  // Household
+  if (name.includes('detergent')) return 'DETERGENT';
+  if (name.includes('cleaner')) return 'CLEANER';
+  
+  // Default - use first 4 letters of product name
+  return productName.substring(0, 4).toUpperCase().replace(/[^A-Z]/g, 'X');
 };

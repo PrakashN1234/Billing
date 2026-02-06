@@ -3,6 +3,7 @@ import { updateProduct } from '../services/firebaseService';
 
 /**
  * Generate QR codes for all inventory items that don't have them
+ * NEW: Uses product code as QR code
  */
 export const generateQRCodesForInventory = async (inventory, storeId = '001') => {
   const itemsWithoutQRCodes = inventory.filter(item => !item.qrcode);
@@ -16,7 +17,8 @@ export const generateQRCodesForInventory = async (inventory, storeId = '001') =>
   
   try {
     const updatePromises = itemsWithoutQRCodes.map(async (item) => {
-      const qrcode = generateUniqueQRCode(item.name, item.id, inventory, storeId);
+      // Use product code as QR code
+      const qrcode = generateUniqueQRCode(item.name, item.id, inventory, storeId, item.code);
       await updateProduct(item.id, { qrcode });
       console.log(`Generated QR code ${qrcode} for ${item.name}`);
       return { id: item.id, name: item.name, qrcode };
@@ -43,10 +45,11 @@ export const generateQRCodesForInventory = async (inventory, storeId = '001') =>
 
 /**
  * Generate a single QR code for a specific item
+ * NEW: Uses product code as QR code
  */
 export const generateQRCodeForItem = async (item, inventory, storeId = '001') => {
   try {
-    const qrcode = generateUniqueQRCode(item.name, item.id, inventory, storeId);
+    const qrcode = generateUniqueQRCode(item.name, item.id, inventory, storeId, item.code);
     await updateProduct(item.id, { qrcode });
     console.log(`Generated QR code ${qrcode} for ${item.name}`);
     return { success: true, qrcode };
@@ -58,13 +61,14 @@ export const generateQRCodeForItem = async (item, inventory, storeId = '001') =>
 
 /**
  * Regenerate all QR codes (useful for migration from barcodes)
+ * NEW: Uses product code as QR code
  */
 export const regenerateAllQRCodes = async (inventory, storeId = '001') => {
   console.log(`Regenerating QR codes for all ${inventory.length} items...`);
   
   try {
     const updatePromises = inventory.map(async (item) => {
-      const qrcode = generateUniqueQRCode(item.name, item.id, inventory, storeId);
+      const qrcode = generateUniqueQRCode(item.name, item.id, inventory, storeId, item.code);
       await updateProduct(item.id, { qrcode });
       console.log(`Regenerated QR code ${qrcode} for ${item.name}`);
       return { id: item.id, name: item.name, qrcode };

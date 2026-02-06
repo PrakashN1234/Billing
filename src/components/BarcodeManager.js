@@ -56,7 +56,7 @@ const BarcodeManager = ({ inventory, onClose }) => {
   const handleGenerateSingleBarcode = async (product) => {
     setIsGenerating(true);
     try {
-      const barcode = generateUniqueBarcode(product.name, product.id, inventory);
+      const barcode = generateUniqueBarcode(product.name, product.id, inventory, product.code);
       await updateProduct(product.id, { barcode });
       alert(`Barcode generated for ${product.name}: ${barcode}`);
       // Refresh would happen automatically due to real-time listeners
@@ -71,7 +71,7 @@ const BarcodeManager = ({ inventory, onClose }) => {
   const handleGenerateSingleQRCode = async (product) => {
     setIsGenerating(true);
     try {
-      const qrcode = generateUniqueQRCode(product.name, product.id, inventory, product.storeId || '001');
+      const qrcode = generateUniqueQRCode(product.name, product.id, inventory, product.storeId || '001', product.code);
       await updateProduct(product.id, { qrcode });
       alert(`QR Code generated for ${product.name}: ${qrcode}`);
       // Refresh would happen automatically due to real-time listeners
@@ -86,10 +86,11 @@ const BarcodeManager = ({ inventory, onClose }) => {
   const handleGenerateBoth = async (product) => {
     setIsGenerating(true);
     try {
-      const barcode = generateUniqueBarcode(product.name, product.id, inventory);
-      const qrcode = generateUniqueQRCode(product.name, product.id, inventory, product.storeId || '001');
+      const productCode = product.code;
+      const barcode = generateUniqueBarcode(product.name, product.id, inventory, productCode);
+      const qrcode = generateUniqueQRCode(product.name, product.id, inventory, product.storeId || '001', productCode);
       await updateProduct(product.id, { barcode, qrcode });
-      alert(`Barcode and QR Code generated for ${product.name}`);
+      alert(`Barcode and QR Code generated for ${product.name}\nCode: ${barcode}`);
     } catch (error) {
       console.error('Error generating codes:', error);
       alert('Failed to generate codes');
@@ -115,11 +116,13 @@ const BarcodeManager = ({ inventory, onClose }) => {
         const product = inventory.find(p => p.id === itemId);
         if (product) {
           const updates = {};
+          // Use product code for both barcode and QR code
+          const productCode = product.code;
           if (!product.barcode) {
-            updates.barcode = generateUniqueBarcode(product.name, product.id, inventory);
+            updates.barcode = generateUniqueBarcode(product.name, product.id, inventory, productCode);
           }
           if (!product.qrcode) {
-            updates.qrcode = generateUniqueQRCode(product.name, product.id, inventory, product.storeId || '001');
+            updates.qrcode = generateUniqueQRCode(product.name, product.id, inventory, product.storeId || '001', productCode);
           }
           if (Object.keys(updates).length > 0) {
             return updateProduct(product.id, updates);

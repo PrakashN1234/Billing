@@ -2,16 +2,54 @@ import QRCode from 'qrcode';
 
 /**
  * Generate unique QR code data for products
- * Format: STORE_PRODUCT_SEQUENCE (e.g., ST001_RICE_000001)
+ * NEW: Simply use the product code as QR code data
  */
-export const generateProductQRData = (productName, productId, storeId = '001') => {
-  // Create a unique QR code data based on product info
-  const storePart = `ST${storeId}`;
-  const categoryCode = getCategoryCode(productName);
-  const productSequence = generateProductSequence(productId);
+export const generateProductQRData = (productName, productId, storeId = '001', productCode = null) => {
+  // If product has a code, use it directly as QR code
+  if (productCode) {
+    return productCode;
+  }
   
-  // Format: STORE_CATEGORY_SEQUENCE (e.g., ST001_FOOD_000123)
-  return `${storePart}_${categoryCode}_${productSequence}`;
+  // If no product code, generate a simple one
+  const categoryPrefix = getCategoryPrefix(productName);
+  let sequence = 1;
+  let qrData = `${categoryPrefix}${String(sequence).padStart(3, '0')}`;
+  
+  return qrData;
+};
+
+// Get simple category prefix for product code generation
+const getCategoryPrefix = (productName) => {
+  const name = productName.toLowerCase();
+  
+  // Food & Beverages
+  if (name.includes('rice')) return 'RICE';
+  if (name.includes('wheat')) return 'WHEAT';
+  if (name.includes('flour')) return 'FLOUR';
+  if (name.includes('oil')) return 'OIL';
+  if (name.includes('ghee')) return 'GHEE';
+  if (name.includes('butter')) return 'BUTTER';
+  if (name.includes('sugar')) return 'SUGAR';
+  if (name.includes('salt')) return 'SALT';
+  if (name.includes('milk')) return 'MILK';
+  if (name.includes('bread')) return 'BREAD';
+  if (name.includes('biscuit')) return 'BISCUIT';
+  if (name.includes('tea')) return 'TEA';
+  if (name.includes('coffee')) return 'COFFEE';
+  if (name.includes('juice')) return 'JUICE';
+  if (name.includes('egg')) return 'EGGS';
+  
+  // Personal Care
+  if (name.includes('soap')) return 'SOAP';
+  if (name.includes('shampoo')) return 'SHAMPOO';
+  if (name.includes('toothpaste')) return 'PASTE';
+  
+  // Household
+  if (name.includes('detergent')) return 'DETERGENT';
+  if (name.includes('cleaner')) return 'CLEANER';
+  
+  // Default - use first 4 letters of product name
+  return productName.substring(0, 4).toUpperCase().replace(/[^A-Z]/g, 'X');
 };
 
 // Generate category code based on product name
@@ -122,23 +160,23 @@ export const generateQRCodeSVG = async (qrData, options = {}) => {
 
 /**
  * Generate unique QR code ensuring no duplicates
- * @param {string} productName - Product name
- * @param {string} productId - Product ID
- * @param {array} inventory - Current inventory to check for duplicates
- * @param {string} storeId - Store ID
- * @returns {string} - Unique QR code data
+ * NEW: Use product code directly
  */
-export const generateUniqueQRCode = (productName, productId, inventory, storeId = '001') => {
-  let qrData = generateProductQRData(productName, productId, storeId);
+export const generateUniqueQRCode = (productName, productId, inventory, storeId = '001', productCode = null) => {
+  // If product has a code, use it directly
+  if (productCode) {
+    return productCode;
+  }
+  
+  // Generate QR code data
+  let qrData = generateProductQRData(productName, productId, storeId, productCode);
   let attempts = 0;
   
-  // If QR code exists, modify the sequence until unique
+  // If QR code exists, modify until unique
   while (!isQRCodeUnique(qrData, inventory, productId) && attempts < 100) {
-    const randomSuffix = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-    const modifiedSequence = (productId + randomSuffix).slice(-6).padStart(6, '0');
-    const storePart = `ST${storeId}`;
-    const categoryCode = getCategoryCode(productName);
-    qrData = `${storePart}_${categoryCode}_${modifiedSequence}`;
+    const categoryPrefix = getCategoryPrefix(productName);
+    const sequence = attempts + 1;
+    qrData = `${categoryPrefix}${String(sequence).padStart(3, '0')}`;
     attempts++;
   }
   
@@ -162,15 +200,18 @@ const isQRCodeUnique = (qrData, inventory, currentProductId) => {
 
 /**
  * Validate QR code format
- * @param {string} qrData - QR code data to validate
- * @returns {boolean} - Whether QR code format is valid
+ * NEW: Accept simple product code format (e.g., RICE001, MILK001)
  */
 export const validateQRCode = (qrData) => {
   if (!qrData) return false;
   
-  // Expected format: ST###_CATEGORY_######
-  const qrPattern = /^ST\d{3}_[A-Z]+_\d{6}$/;
-  return qrPattern.test(qrData);
+  // Accept simple product code format: LETTERS + NUMBERS (e.g., RICE001, MILK001)
+  const simplePattern = /^[A-Z]{3,10}\d{3}$/;
+  if (simplePattern.test(qrData)) return true;
+  
+  // Also accept old format for backward compatibility: ST###_CATEGORY_######
+  const oldPattern = /^ST\d{3}_[A-Z]+_\d{6}$/;
+  return oldPattern.test(qrData);
 };
 
 /**
