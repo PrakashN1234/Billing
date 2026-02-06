@@ -304,20 +304,20 @@ const QRCodeScanner = ({ onScan, onClose, isActive }) => {
 
           {/* Help Section */}
           <div className="help-section">
-            <h4>Why QR Codes?</h4>
+            <h4>Troubleshooting</h4>
             <div className="help-grid">
               <div className="help-item">
                 <CheckCircle size={16} />
                 <div>
-                  <strong>Better mobile scanning</strong>
-                  <p>QR codes work much better with phone cameras than traditional barcodes.</p>
+                  <strong>Product not found?</strong>
+                  <p>Make sure QR codes are generated for your products. Go to Admin Dashboard → Manage Barcodes → Generate QR Codes.</p>
                 </div>
               </div>
               <div className="help-item">
                 <CheckCircle size={16} />
                 <div>
-                  <strong>More reliable</strong>
-                  <p>Faster detection and works in various lighting conditions.</p>
+                  <strong>Why QR Codes?</strong>
+                  <p>QR codes work much better with phone cameras than traditional barcodes. Faster detection and works in various lighting conditions.</p>
                 </div>
               </div>
             </div>
