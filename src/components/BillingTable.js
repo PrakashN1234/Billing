@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Trash2, Receipt, AlertCircle, Camera, Package, Printer, Download, FileText, X } from 'lucide-react';
 import { saveSale, updateStock } from '../services/firebaseService';
 import { getStoreSettings, calculateBillTotal, formatCurrency, getTaxDisplayName } from '../services/storeSettingsService';
-import QRCodeScanner from './QRCodeScanner';
+import QRCodeScannerNew from './QRCodeScannerNew';
 import { printBill, downloadBill, generatePDF } from '../utils/billGenerator';
 import { useAuth } from '../contexts/AuthContext';
 import { getUserStoreId, getUserStoreName } from '../utils/roleManager';
@@ -470,8 +470,8 @@ const BillingTable = ({ cart, inventory, updateQty, removeItem, clearCart, addTo
         </div>
       )}
 
-      {/* QR Code Scanner */}
-      <QRCodeScanner 
+      {/* QR Code Scanner - New ZXing Implementation */}
+      <QRCodeScannerNew 
         isActive={scannerActive}
         onScan={(code) => {
           console.log('QR Code scanned in BillingTable:', code);

@@ -10761,3 +10761,123 @@ body {
 .barcode-stats .stat-card svg {
   flex-shrink: 0;
 }
+
+/* ZXing QR Scanner Styles */
+.video-container {
+  position: relative;
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #000;
+}
+
+.scanner-video {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 12px;
+}
+
+.scan-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.scan-frame {
+  width: 250px;
+  height: 250px;
+  border: 3px solid #10b981;
+  border-radius: 12px;
+  box-shadow: 
+    0 0 0 9999px rgba(0, 0, 0, 0.5),
+    0 0 20px rgba(16, 185, 129, 0.5),
+    inset 0 0 20px rgba(16, 185, 129, 0.3);
+  animation: scan-pulse 2s ease-in-out infinite;
+}
+
+@keyframes scan-pulse {
+  0%, 100% {
+    border-color: #10b981;
+    box-shadow: 
+      0 0 0 9999px rgba(0, 0, 0, 0.5),
+      0 0 20px rgba(16, 185, 129, 0.5),
+      inset 0 0 20px rgba(16, 185, 129, 0.3);
+  }
+  50% {
+    border-color: #34d399;
+    box-shadow: 
+      0 0 0 9999px rgba(0, 0, 0, 0.5),
+      0 0 30px rgba(52, 211, 153, 0.8),
+      inset 0 0 30px rgba(52, 211, 153, 0.5);
+  }
+}
+
+.camera-active {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+}
+
+.camera-controls {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.stop-camera-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.stop-camera-btn:hover {
+  background: #dc2626;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.scanning-tips {
+  text-align: center;
+  padding: 12px;
+  background: linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%);
+  border-radius: 8px;
+  border: 1px solid #3b82f6;
+}
+
+.scanning-tips p {
+  margin: 0;
+  font-size: 14px;
+  color: #1f2937;
+  font-weight: 500;
+}
+
+/* Responsive video container */
+@media (max-width: 768px) {
+  .video-container {
+    max-width: 100%;
+  }
+  
+  .scan-frame {
+    width: 200px;
+    height: 200px;
+  }
+}
