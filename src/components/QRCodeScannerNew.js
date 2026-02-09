@@ -139,10 +139,10 @@ const QRCodeScannerNew = ({ onScan, onClose, isActive, storeSettings = {} }) => 
   const handleScannedCode = async (code) => {
     setScanSuccess(true);
     
-    // Vibrate if supported
-    if (navigator.vibrate) {
-      navigator.vibrate([100, 50, 100]);
-    }
+    // Don't vibrate - can be annoying for multiple scans
+    // if (navigator.vibrate) {
+    //   navigator.vibrate([100, 50, 100]);
+    // }
 
     // Add to recent scans
     setRecentScans(prev => {
@@ -150,8 +150,8 @@ const QRCodeScannerNew = ({ onScan, onClose, isActive, storeSettings = {} }) => 
       return newScans;
     });
 
-    // Stop camera and submit
-    stopCamera();
+    // Keep camera running for continuous scanning
+    // Don't stop camera - user can scan multiple products
     
     setTimeout(() => {
       setScanSuccess(false);
@@ -288,6 +288,12 @@ const QRCodeScannerNew = ({ onScan, onClose, isActive, storeSettings = {} }) => 
                   />
                   <div className="scan-overlay">
                     <div className="scan-frame"></div>
+                    {scanSuccess && (
+                      <div className="scan-success-overlay">
+                        <CheckCircle size={48} color="#10b981" />
+                        <p>Product Added!</p>
+                      </div>
+                    )}
                   </div>
                 </div>
                 <div className="camera-controls">
@@ -297,7 +303,7 @@ const QRCodeScannerNew = ({ onScan, onClose, isActive, storeSettings = {} }) => 
                   </button>
                 </div>
                 <div className="scanning-tips">
-                  <p>📱 Hold steady • 💡 Good lighting • 🎯 Center QR code in frame</p>
+                  <p>📱 Hold steady • 💡 Good lighting • 🎯 Center code in frame • ✅ Scan multiple products</p>
                 </div>
               </div>
             )}

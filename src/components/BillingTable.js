@@ -477,7 +477,8 @@ const BillingTable = ({ cart, inventory, updateQty, removeItem, clearCart, addTo
         onScan={(code) => {
           console.log('QR Code scanned in BillingTable:', code);
           handleFetchProduct(code);
-          setScannerActive(false);
+          // Keep scanner open for continuous scanning
+          // User can close manually when done
         }}
         onClose={() => setScannerActive(false)}
       />
