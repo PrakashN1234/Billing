@@ -1,12 +1,41 @@
 // Bill generation and printing utilities
 
-export const generateBillHTML = (billData) => {
-  const { items, subtotal, gst, discount, total, paymentMode, itemCount, timestamp, billNumber, storeName } = billData;
+export const generateBillHTML = (billData, storeSettings = {}) => {
+  const { 
+    items, 
+    subtotal, 
+    taxAmount, 
+    taxRate,
+    discount, 
+    total, 
+    paymentMode, 
+    itemCount, 
+    timestamp, 
+    billNumber, 
+    storeName,
+    currency = 'INR',
+    currencySymbol = '₹'
+  } = billData;
   
   const currentDate = new Date(timestamp || Date.now());
-  // Use the generated bill number from the data, fallback to timestamp-based if not available
   const displayBillNumber = billNumber || `BILL-${currentDate.getTime().toString().slice(-8)}`;
-  const displayStoreName = storeName || 'PRABA STORE';
+  const displayStoreName = storeSettings.businessName || storeName || 'PRABA STORE';
+  const displayAddress = storeSettings.businessAddress || '123 Main Street, City';
+  const displayPhone = storeSettings.businessPhone || '+91 98765 43210';
+  const displayGST = storeSettings.gstNumber || 'GST: 29ABCDE1234F1Z5';
+  const displayFooter = storeSettings.receiptFooter || 'Thank you for shopping with us!';
+  const showLogo = storeSettings.printLogo || false;
+  
+  // Get tax display name based on currency
+  const getTaxName = (curr) => {
+    switch (curr) {
+      case 'INR': return 'GST';
+      case 'USD': return 'Sales Tax';
+      case 'EUR': return 'VAT';
+      case 'GBP': return 'VAT';
+      default: return 'Tax';
+    }
+  };
   
   return `
     <!DOCTYPE html>
@@ -33,6 +62,18 @@ export const generateBillHTML = (billData) => {
           border-bottom: 2px solid #000;
           padding-bottom: 10px;
           margin-bottom: 15px;
+        }
+        .logo {
+          width: 80px;
+          height: 80px;
+          margin: 0 auto 10px;
+          background: #f0f0f0;
+          border: 2px solid #000;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 12px;
+          color: #666;
         }
         .store-name {
           font-size: 24px;
@@ -118,11 +159,12 @@ export const generateBillHTML = (billData) => {
     <body>
       <div class="bill-container">
         <div class="header">
+          ${showLogo ? '<div class="logo">LOGO</div>' : ''}
           <div class="store-name">${displayStoreName.toUpperCase()}</div>
           <div class="store-details">
-            123 Main Street, City<br>
-            Phone: +91 98765 43210<br>
-            GST: 29ABCDE1234F1Z5
+            ${displayAddress}<br>
+            Phone: ${displayPhone}<br>
+            ${displayGST}
           </div>
         </div>
         
@@ -152,8 +194,8 @@ export const generateBillHTML = (billData) => {
               <tr>
                 <td class="item-name">${item.name}</td>
                 <td class="item-qty">${item.qty}</td>
-                <td class="item-price">₹${item.price.toFixed(2)}</td>
-                <td class="item-total">₹${item.total.toFixed(2)}</td>
+                <td class="item-price">${currencySymbol}${item.price.toFixed(2)}</td>
+                <td class="item-total">${currencySymbol}${item.total.toFixed(2)}</td>
               </tr>
             `).join('')}
           </tbody>
@@ -162,26 +204,26 @@ export const generateBillHTML = (billData) => {
         <div class="totals-section">
           <div class="total-row">
             <span>Subtotal:</span>
-            <span>₹${subtotal.toFixed(2)}</span>
+            <span>${currencySymbol}${subtotal.toFixed(2)}</span>
           </div>
           <div class="total-row">
-            <span>GST (18%):</span>
-            <span>₹${gst.toFixed(2)}</span>
+            <span>${getTaxName(currency)} (${taxRate}%):</span>
+            <span>${currencySymbol}${taxAmount.toFixed(2)}</span>
           </div>
           ${discount > 0 ? `
             <div class="total-row">
               <span>Discount:</span>
-              <span>-₹${discount.toFixed(2)}</span>
+              <span>-${currencySymbol}${discount.toFixed(2)}</span>
             </div>
           ` : ''}
           <div class="total-row final-total">
             <span>TOTAL:</span>
-            <span>₹${total.toFixed(2)}</span>
+            <span>${currencySymbol}${total.toFixed(2)}</span>
           </div>
         </div>
         
         <div class="footer">
-          <div class="thank-you">Thank You for Shopping!</div>
+          <div class="thank-you">${displayFooter}</div>
           <div>Visit Again Soon</div>
           <div style="margin-top: 10px; font-size: 10px;">
             Generated on ${new Date().toLocaleString()}
@@ -193,11 +235,16 @@ export const generateBillHTML = (billData) => {
   `;
 };
 
-export const printBill = (billData) => {
-  const billHTML = generateBillHTML(billData);
+export const printBill = (billData, storeSettings = {}) => {
+  const billHTML = generateBillHTML(billData, storeSettings);
   
   // Create a new window for printing
   const printWindow = window.open('', '_blank', 'width=400,height=600');
+  if (!printWindow) {
+    alert('Please allow popups to print the bill');
+    return;
+  }
+  
   printWindow.document.write(billHTML);
   printWindow.document.close();
   
@@ -213,10 +260,9 @@ export const printBill = (billData) => {
   };
 };
 
-export const downloadBill = (billData) => {
-  const billHTML = generateBillHTML(billData);
+export const downloadBill = (billData, storeSettings = {}) => {
+  const billHTML = generateBillHTML(billData, storeSettings);
   const currentDate = new Date(billData.timestamp || Date.now());
-  // Use the actual bill number from the data
   const displayBillNumber = billData.billNumber || `BILL-${currentDate.getTime().toString().slice(-8)}`;
   
   // Create blob and download
@@ -234,11 +280,16 @@ export const downloadBill = (billData) => {
   URL.revokeObjectURL(url);
 };
 
-export const generatePDF = async (billData) => {
+export const generatePDF = async (billData, storeSettings = {}) => {
   // For PDF generation, we'll use the browser's print to PDF functionality
-  const billHTML = generateBillHTML(billData);
+  const billHTML = generateBillHTML(billData, storeSettings);
   
   const printWindow = window.open('', '_blank', 'width=400,height=600');
+  if (!printWindow) {
+    alert('Please allow popups to save as PDF');
+    return;
+  }
+  
   printWindow.document.write(billHTML);
   printWindow.document.close();
   

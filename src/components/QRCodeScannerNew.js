@@ -118,7 +118,20 @@ const QRCodeScannerNew = ({ onScan, onClose, isActive, storeSettings = {} }) => 
       } catch (error) {
         console.error('Error stopping camera:', error);
       }
+      codeReaderRef.current = null;
     }
+    
+    // Also stop all video tracks to ensure camera is released
+    if (videoRef.current && videoRef.current.srcObject) {
+      const stream = videoRef.current.srcObject;
+      const tracks = stream.getTracks();
+      tracks.forEach(track => {
+        track.stop();
+        console.log('🛑 Stopped video track:', track.label);
+      });
+      videoRef.current.srcObject = null;
+    }
+    
     setIsCameraActive(false);
     setLastScannedCode('');
   };

@@ -160,19 +160,19 @@ const BillingTable = ({ cart, inventory, updateQty, removeItem, clearCart, addTo
 
   const handlePrintBill = () => {
     if (lastBillData) {
-      printBill(lastBillData);
+      printBill(lastBillData, storeSettings);
     }
   };
 
   const handleDownloadBill = () => {
     if (lastBillData) {
-      downloadBill(lastBillData);
+      downloadBill(lastBillData, storeSettings);
     }
   };
 
   const handleDownloadPDF = () => {
     if (lastBillData) {
-      generatePDF(lastBillData);
+      generatePDF(lastBillData, storeSettings);
     }
   };
 
