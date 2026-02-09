@@ -25,15 +25,36 @@ const CashierDashboard = ({ inventory, setActiveView }) => {
   const userStoreId = getUserStoreId(currentUser?.email);
 
   const calculateTodayStats = useCallback((salesData) => {
-    const today = new Date().toISOString().split('T')[0];
+    console.log('📊 Calculating today stats from sales:', salesData.length);
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const todayTimestamp = today.getTime();
+    
     const todaySales = salesData.filter(sale => {
-      const saleDate = sale.date || new Date(sale.timestamp?.seconds * 1000).toISOString().split('T')[0];
-      return saleDate === today;
+      // Handle both Firestore timestamp and regular timestamp
+      let saleTimestamp;
+      if (sale.timestamp?.seconds) {
+        saleTimestamp = sale.timestamp.seconds * 1000;
+      } else if (sale.timestamp) {
+        saleTimestamp = sale.timestamp;
+      } else {
+        return false;
+      }
+      
+      const saleDate = new Date(saleTimestamp);
+      saleDate.setHours(0, 0, 0, 0);
+      
+      return saleDate.getTime() === todayTimestamp;
     });
 
+    console.log('📅 Today\'s sales count:', todaySales.length);
+    
     const todayTotal = todaySales.reduce((sum, sale) => sum + (sale.total || 0), 0);
     const todayCount = todaySales.length;
     const avgBill = todayCount > 0 ? todayTotal / todayCount : 0;
+
+    console.log('💰 Today total:', todayTotal, 'Bills:', todayCount, 'Average:', avgBill);
 
     setTodayStats({
       todaySales: todayTotal,

@@ -1,6 +1,10 @@
 // Bill generation and printing utilities
 
 export const generateBillHTML = (billData, storeSettings = {}) => {
+  console.log('📄 Generating bill HTML');
+  console.log('Bill data:', billData);
+  console.log('Store settings:', storeSettings);
+  
   const { 
     items, 
     subtotal, 
@@ -24,7 +28,9 @@ export const generateBillHTML = (billData, storeSettings = {}) => {
   const displayPhone = storeSettings.businessPhone || '+91 98765 43210';
   const displayGST = storeSettings.gstNumber || 'GST: 29ABCDE1234F1Z5';
   const displayFooter = storeSettings.receiptFooter || 'Thank you for shopping with us!';
-  const showLogo = storeSettings.printLogo || false;
+  const showLogo = storeSettings.printLogo === true;
+  
+  console.log('🏷️ Show logo:', showLogo, 'printLogo setting:', storeSettings.printLogo);
   
   // Get tax display name based on currency
   const getTaxName = (curr) => {
@@ -64,16 +70,19 @@ export const generateBillHTML = (billData, storeSettings = {}) => {
           margin-bottom: 15px;
         }
         .logo {
-          width: 80px;
-          height: 80px;
-          margin: 0 auto 10px;
-          background: #f0f0f0;
-          border: 2px solid #000;
+          width: 100px;
+          height: 100px;
+          margin: 0 auto 15px;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          border: 3px solid #000;
+          border-radius: 12px;
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 12px;
-          color: #666;
+          font-size: 16px;
+          font-weight: bold;
+          color: white;
+          text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         }
         .store-name {
           font-size: 24px;
@@ -236,28 +245,38 @@ export const generateBillHTML = (billData, storeSettings = {}) => {
 };
 
 export const printBill = (billData, storeSettings = {}) => {
-  const billHTML = generateBillHTML(billData, storeSettings);
-  
-  // Create a new window for printing
-  const printWindow = window.open('', '_blank', 'width=400,height=600');
-  if (!printWindow) {
-    alert('Please allow popups to print the bill');
-    return;
-  }
-  
-  printWindow.document.write(billHTML);
-  printWindow.document.close();
-  
-  // Wait for content to load then print
-  printWindow.onload = () => {
-    printWindow.focus();
-    printWindow.print();
+  try {
+    console.log('🖨️ Printing bill with data:', billData);
+    console.log('⚙️ Store settings:', storeSettings);
     
-    // Close the window after printing (optional)
-    printWindow.onafterprint = () => {
-      printWindow.close();
+    const billHTML = generateBillHTML(billData, storeSettings);
+    
+    // Create a new window for printing
+    const printWindow = window.open('', '_blank', 'width=400,height=600');
+    if (!printWindow) {
+      alert('Please allow popups to print the bill');
+      return;
+    }
+    
+    printWindow.document.write(billHTML);
+    printWindow.document.close();
+    
+    // Wait for content to load then print
+    printWindow.onload = () => {
+      printWindow.focus();
+      setTimeout(() => {
+        printWindow.print();
+      }, 250); // Small delay to ensure content is rendered
+      
+      // Close the window after printing (optional)
+      printWindow.onafterprint = () => {
+        printWindow.close();
+      };
     };
-  };
+  } catch (error) {
+    console.error('❌ Error printing bill:', error);
+    alert('Error printing bill: ' + error.message);
+  }
 };
 
 export const downloadBill = (billData, storeSettings = {}) => {
