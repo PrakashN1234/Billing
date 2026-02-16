@@ -30,12 +30,24 @@ export const generateBillHTML = (billData, storeSettings = {}) => {
   const displayFooter = storeSettings.receiptFooter || 'Thank you for shopping with us!';
   const showLogo = storeSettings.printLogo === true;
   
-  // Simple SVG logo for "My Store" - can be replaced with actual logo URL
-  const logoSVG = `<svg width="120" height="60" viewBox="0 0 120 60" xmlns="http://www.w3.org/2000/svg">
-    <rect width="120" height="60" fill="#6366f1" rx="8"/>
-    <path d="M20 25 L30 15 L40 25 L40 45 L20 45 Z" fill="white"/>
-    <rect x="25" y="30" width="10" height="8" fill="#6366f1"/>
+  // Exact store icon logo matching the provided image
+  const logoSVG = `<svg width="80" height="80" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <!-- Store building shape with awning -->
+    <path d="M 20 30 Q 20 20, 30 20 L 70 20 Q 80 20, 80 30 L 80 35 Q 80 40, 75 40 L 25 40 Q 20 40, 20 35 Z" 
+          fill="none" stroke="#6366f1" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
     
+    <!-- Store front -->
+    <rect x="20" y="38" width="60" height="50" rx="4" 
+          fill="none" stroke="#6366f1" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+    
+    <!-- Door -->
+    <rect x="42" y="58" width="16" height="30" rx="2"
+          fill="none" stroke="#6366f1" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    
+    <!-- Awning scallops -->
+    <circle cx="30" cy="40" r="3" fill="#6366f1"/>
+    <circle cx="50" cy="40" r="3" fill="#6366f1"/>
+    <circle cx="70" cy="40" r="3" fill="#6366f1"/>
   </svg>`;
   
   console.log('🏷️ Show logo:', showLogo, 'printLogo setting:', storeSettings.printLogo);
@@ -78,8 +90,8 @@ export const generateBillHTML = (billData, storeSettings = {}) => {
           margin-bottom: 15px;
         }
         .logo {
-          width: 120px;
-          height: 60px;
+          width: 80px;
+          height: 80px;
           margin: 0 auto 15px;
           display: flex;
           align-items: center;
@@ -89,6 +101,9 @@ export const generateBillHTML = (billData, storeSettings = {}) => {
           max-width: 100%;
           max-height: 100%;
           object-fit: contain;
+        }
+        .logo svg {
+          display: block;
         }
         .store-name {
           font-size: 24px;
