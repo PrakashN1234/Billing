@@ -522,6 +522,56 @@ export const getSalesByStore = async (storeId = null, limitCount = 50) => {
 };
 
 /**
+ * Subscribe to sales changes filtered by store
+ * @param {string|null} storeId - Store ID to filter by, null for all stores
+ * @param {number} limitCount - Maximum number of sales to fetch
+ * @param {Function} onUpdate - Callback function for updates
+ * @param {Function} onError - Callback function for errors
+ * @returns {Function} - Unsubscribe function
+ */
+export const subscribeToSalesByStore = (storeId = null, limitCount = 50, onUpdate, onError) => {
+  try {
+    const salesRef = collection(db, 'sales');
+    let salesQuery;
+    
+    if (storeId) {
+      salesQuery = query(
+        salesRef,
+        where('storeId', '==', storeId),
+        orderBy('timestamp', 'desc'),
+        limit(limitCount)
+      );
+    } else {
+      salesQuery = query(
+        salesRef,
+        orderBy('timestamp', 'desc'),
+        limit(limitCount)
+      );
+    }
+    
+    return onSnapshot(
+      salesQuery,
+      (snapshot) => {
+        const sales = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        console.log('📊 Sales updated via subscription:', sales.length);
+        onUpdate(sales);
+      },
+      (error) => {
+        console.error('Error in sales subscription:', error);
+        if (onError) onError(error);
+      }
+    );
+  } catch (error) {
+    console.error('Error setting up sales subscription:', error);
+    if (onError) onError(error);
+    return () => {}; // Return empty unsubscribe function
+  }
+};
+
+/**
  * Subscribe to inventory changes filtered by store
  * @param {string|null} storeId - Store ID to filter by, null for all stores
  * @param {Function} onUpdate - Callback function for updates

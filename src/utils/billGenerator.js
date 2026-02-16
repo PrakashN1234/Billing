@@ -35,7 +35,7 @@ export const generateBillHTML = (billData, storeSettings = {}) => {
     <rect width="120" height="60" fill="#6366f1" rx="8"/>
     <path d="M20 25 L30 15 L40 25 L40 45 L20 45 Z" fill="white"/>
     <rect x="25" y="30" width="10" height="8" fill="#6366f1"/>
-    <text x="50" y="38" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="white">My Store</text>
+    
   </svg>`;
   
   console.log('🏷️ Show logo:', showLogo, 'printLogo setting:', storeSettings.printLogo);

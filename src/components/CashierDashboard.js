@@ -8,7 +8,7 @@ import {
   User,
   Clock
 } from 'lucide-react';
-import { getSalesByStore } from '../services/firebaseService';
+import { subscribeToSalesByStore } from '../services/firebaseService';
 import { useAuth } from '../contexts/AuthContext';
 import { getRoleDisplayName, getUserRole, getUserInfo, getUserStoreId } from '../utils/roleManager';
 
@@ -65,15 +65,36 @@ const CashierDashboard = ({ inventory, setActiveView }) => {
 
   const loadDashboardData = useCallback(async () => {
     try {
-      // Cashier can only see their store's sales
-      const salesData = await getSalesByStore(userStoreId, 50);
-      calculateTodayStats(salesData);
+      setLoading(false); // Set loading false immediately, subscription will handle data
     } catch (error) {
       console.error('Error loading dashboard data:', error);
-    } finally {
       setLoading(false);
     }
-  }, [calculateTodayStats, userStoreId]);
+  }, [userStoreId]);
+
+  // Subscribe to real-time sales updates
+  useEffect(() => {
+    if (!userStoreId) return;
+    
+    console.log('📊 Setting up sales subscription for store:', userStoreId);
+    
+    const unsubscribe = subscribeToSalesByStore(
+      userStoreId,
+      50,
+      (salesData) => {
+        console.log('💰 Sales data received:', salesData.length, 'sales');
+        calculateTodayStats(salesData);
+      },
+      (error) => {
+        console.error('Error in sales subscription:', error);
+      }
+    );
+
+    return () => {
+      console.log('🔌 Unsubscribing from sales');
+      unsubscribe();
+    };
+  }, [userStoreId, calculateTodayStats]);
 
   useEffect(() => {
     loadDashboardData();

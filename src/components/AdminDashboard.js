@@ -12,7 +12,7 @@ import {
   Users,
   Settings
 } from 'lucide-react';
-import { getSalesByStore, getAccessibleStores, subscribeToUsers } from '../services/firebaseService';
+import { subscribeToSalesByStore, getAccessibleStores, subscribeToUsers } from '../services/firebaseService';
 import { useAuth } from '../contexts/AuthContext';
 import { generateQRCodesForInventory } from '../utils/generateInventoryQRCodes';
 import { generateCodesForInventory } from '../utils/generateProductCodes';
@@ -43,14 +43,35 @@ const AdminDashboard = ({ inventory, setActiveView }) => {
 
   const loadDashboardData = useCallback(async () => {
     try {
-      // Admin can only see their store's sales
-      const salesData = await getSalesByStore(userStoreId, 50);
-      setSales(salesData);
+      setLoading(false); // Set loading false immediately, subscription will handle data
     } catch (error) {
       console.error('Error loading dashboard data:', error);
-    } finally {
       setLoading(false);
     }
+  }, [userStoreId]);
+
+  // Subscribe to real-time sales updates
+  useEffect(() => {
+    if (!userStoreId) return;
+    
+    console.log('📊 Admin: Setting up sales subscription for store:', userStoreId);
+    
+    const unsubscribe = subscribeToSalesByStore(
+      userStoreId,
+      50,
+      (salesData) => {
+        console.log('💰 Admin: Sales data received:', salesData.length, 'sales');
+        setSales(salesData);
+      },
+      (error) => {
+        console.error('Admin: Error in sales subscription:', error);
+      }
+    );
+
+    return () => {
+      console.log('🔌 Admin: Unsubscribing from sales');
+      unsubscribe();
+    };
   }, [userStoreId]);
 
   const loadStoreData = useCallback(async () => {
@@ -93,7 +114,17 @@ const AdminDashboard = ({ inventory, setActiveView }) => {
       !userStoreId || item.storeId === userStoreId
     );
     
-    const totalSales = sales.reduce((sum, sale) => sum + sale.total, 0);
+    console.log('📊 Calculating stats from sales:', sales.length, 'sales');
+    console.log('💰 Sales data sample:', sales.slice(0, 2));
+    
+    const totalSales = sales.reduce((sum, sale) => {
+      const saleTotal = sale.total || 0;
+      console.log('Adding sale total:', saleTotal);
+      return sum + saleTotal;
+    }, 0);
+    
+    console.log('💵 Total sales calculated:', totalSales);
+    
     const productsWithQRCodes = storeInventory.filter(item => item.qrcode || item.barcode).length;
     const productsWithoutQRCodes = storeInventory.length - productsWithQRCodes;
     const productsWithCodes = storeInventory.filter(item => item.code).length;
