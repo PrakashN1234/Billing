@@ -30,24 +30,11 @@ export const generateBillHTML = (billData, storeSettings = {}) => {
   const displayFooter = storeSettings.receiptFooter || 'Thank you for shopping with us!';
   const showLogo = storeSettings.printLogo === true;
   
-  // Exact store icon logo matching the provided image
-  const logoSVG = `<svg width="80" height="80" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-    <!-- Store building shape with awning -->
-    <path d="M 20 30 Q 20 20, 30 20 L 70 20 Q 80 20, 80 30 L 80 35 Q 80 40, 75 40 L 25 40 Q 20 40, 20 35 Z" 
-          fill="none" stroke="#6366f1" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
-    
-    <!-- Store front -->
-    <rect x="20" y="38" width="60" height="50" rx="4" 
-          fill="none" stroke="#6366f1" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
-    
-    <!-- Door -->
-    <rect x="42" y="58" width="16" height="30" rx="2"
-          fill="none" stroke="#6366f1" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
-    
-    <!-- Awning scallops -->
-    <circle cx="30" cy="40" r="3" fill="#6366f1"/>
-    <circle cx="50" cy="40" r="3" fill="#6366f1"/>
-    <circle cx="70" cy="40" r="3" fill="#6366f1"/>
+  // Exact store icon logo from the website
+  const logoSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-store store-icon">
+    <path d="M15 21v-5a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v5"></path>
+    <path d="M17.774 10.31a1.12 1.12 0 0 0-1.549 0 2.5 2.5 0 0 1-3.451 0 1.12 1.12 0 0 0-1.548 0 2.5 2.5 0 0 1-3.452 0 1.12 1.12 0 0 0-1.549 0 2.5 2.5 0 0 1-3.77-3.24812.889-4.184A2 2 0 0 1 7 2h10a2 2 0 0 1 1.653.87312.895 4.192a2.5 2.5 0 0 1-3.774 3.244"></path>
+    <path d="M4 10.95V19a2 2 0 0 0 2 2h12a2 2 0 0 0 0 2-2v-8.05"></path>
   </svg>`;
   
   console.log('🏷️ Show logo:', showLogo, 'printLogo setting:', storeSettings.printLogo);
