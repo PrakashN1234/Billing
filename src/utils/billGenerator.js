@@ -30,11 +30,11 @@ export const generateBillHTML = (billData, storeSettings = {}) => {
   const displayFooter = storeSettings.receiptFooter || 'Thank you for shopping with us!';
   const showLogo = storeSettings.printLogo === true;
   
-  // Exact store icon logo from the website
-  const logoSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-store store-icon">
+  // Exact store icon logo from the website with proper viewBox
+  const logoSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="padding: 10px;">
     <path d="M15 21v-5a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v5"></path>
     <path d="M17.774 10.31a1.12 1.12 0 0 0-1.549 0 2.5 2.5 0 0 1-3.451 0 1.12 1.12 0 0 0-1.548 0 2.5 2.5 0 0 1-3.452 0 1.12 1.12 0 0 0-1.549 0 2.5 2.5 0 0 1-3.77-3.24812.889-4.184A2 2 0 0 1 7 2h10a2 2 0 0 1 1.653.87312.895 4.192a2.5 2.5 0 0 1-3.774 3.244"></path>
-    <path d="M4 10.95V19a2 2 0 0 0 2 2h12a2 2 0 0 0 0 2-2v-8.05"></path>
+    <path d="M4 10.95V19a2 2 0 0 0 2 2h12a2 2 0 0 0 2 2v-8.05"></path>
   </svg>`;
   
   console.log('🏷️ Show logo:', showLogo, 'printLogo setting:', storeSettings.printLogo);
@@ -77,20 +77,18 @@ export const generateBillHTML = (billData, storeSettings = {}) => {
           margin-bottom: 15px;
         }
         .logo {
-          width: 80px;
-          height: 80px;
+          width: 100px;
+          height: 100px;
           margin: 0 auto 15px;
           display: flex;
           align-items: center;
           justify-content: center;
-        }
-        .logo img {
-          max-width: 100%;
-          max-height: 100%;
-          object-fit: contain;
+          overflow: visible;
         }
         .logo svg {
           display: block;
+          width: 100%;
+          height: 100%;
         }
         .store-name {
           font-size: 24px;
