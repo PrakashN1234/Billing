@@ -70,7 +70,7 @@ const CashierDashboard = ({ inventory, setActiveView }) => {
       console.error('Error loading dashboard data:', error);
       setLoading(false);
     }
-  }, [userStoreId]);
+  }, []); // No dependencies needed
 
   // Subscribe to real-time sales updates
   useEffect(() => {
