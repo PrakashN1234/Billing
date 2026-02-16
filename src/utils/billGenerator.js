@@ -23,12 +23,20 @@ export const generateBillHTML = (billData, storeSettings = {}) => {
   
   const currentDate = new Date(timestamp || Date.now());
   const displayBillNumber = billNumber || `BILL-${currentDate.getTime().toString().slice(-8)}`;
-  const displayStoreName = storeSettings.businessName || storeName || 'PRABA STORE';
+  const displayStoreName = storeSettings.businessName || storeName || 'My Store';
   const displayAddress = storeSettings.businessAddress || '123 Main Street, City';
   const displayPhone = storeSettings.businessPhone || '+91 98765 43210';
   const displayGST = storeSettings.gstNumber || 'GST: 29ABCDE1234F1Z5';
   const displayFooter = storeSettings.receiptFooter || 'Thank you for shopping with us!';
   const showLogo = storeSettings.printLogo === true;
+  
+  // Simple SVG logo for "My Store" - can be replaced with actual logo URL
+  const logoSVG = `<svg width="120" height="60" viewBox="0 0 120 60" xmlns="http://www.w3.org/2000/svg">
+    <rect width="120" height="60" fill="#6366f1" rx="8"/>
+    <path d="M20 25 L30 15 L40 25 L40 45 L20 45 Z" fill="white"/>
+    <rect x="25" y="30" width="10" height="8" fill="#6366f1"/>
+    <text x="50" y="38" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="white">My Store</text>
+  </svg>`;
   
   console.log('🏷️ Show logo:', showLogo, 'printLogo setting:', storeSettings.printLogo);
   
@@ -70,19 +78,17 @@ export const generateBillHTML = (billData, storeSettings = {}) => {
           margin-bottom: 15px;
         }
         .logo {
-          width: 100px;
-          height: 100px;
+          width: 120px;
+          height: 60px;
           margin: 0 auto 15px;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          border: 3px solid #000;
-          border-radius: 12px;
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 16px;
-          font-weight: bold;
-          color: white;
-          text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .logo img {
+          max-width: 100%;
+          max-height: 100%;
+          object-fit: contain;
         }
         .store-name {
           font-size: 24px;
@@ -168,7 +174,7 @@ export const generateBillHTML = (billData, storeSettings = {}) => {
     <body>
       <div class="bill-container">
         <div class="header">
-          ${showLogo ? '<div class="logo">LOGO</div>' : ''}
+          ${showLogo ? `<div class="logo">${logoSVG}</div>` : ''}
           <div class="store-name">${displayStoreName.toUpperCase()}</div>
           <div class="store-details">
             ${displayAddress}<br>

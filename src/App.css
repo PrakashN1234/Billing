@@ -2300,6 +2300,28 @@ body {
     border-left: none;
     border-top: 1px solid var(--gray-200);
   }
+  
+  .product-details {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  
+  .product-details .product-code {
+    flex-basis: 100%;
+    font-size: 0.75rem;
+  }
+  
+  .product-item {
+    padding: 0.75rem !important;
+  }
+  
+  .product-header strong {
+    font-size: 0.8125rem;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 }
 
 /* Admin Panel Styles - Full Width Design - Updated */
