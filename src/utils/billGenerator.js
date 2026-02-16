@@ -30,11 +30,11 @@ export const generateBillHTML = (billData, storeSettings = {}) => {
   const displayFooter = storeSettings.receiptFooter || 'Thank you for shopping with us!';
   const showLogo = storeSettings.printLogo === true;
   
-  // Exact store icon logo from the website with proper viewBox
-  const logoSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="padding: 10px;">
+  // Exact store icon logo from the website with expanded viewBox to prevent cropping
+  const logoSVG = `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="-2 -2 28 28" fill="none" stroke="#6366f1" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
     <path d="M15 21v-5a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v5"></path>
-    <path d="M17.774 10.31a1.12 1.12 0 0 0-1.549 0 2.5 2.5 0 0 1-3.451 0 1.12 1.12 0 0 0-1.548 0 2.5 2.5 0 0 1-3.452 0 1.12 1.12 0 0 0-1.549 0 2.5 2.5 0 0 1-3.77-3.24812.889-4.184A2 2 0 0 1 7 2h10a2 2 0 0 1 1.653.87312.895 4.192a2.5 2.5 0 0 1-3.774 3.244"></path>
-    <path d="M4 10.95V19a2 2 0 0 0 2 2h12a2 2 0 0 0 2 2v-8.05"></path>
+    <path d="M17.774 10.31a1.12 1.12 0 0 0-1.549 0 2.5 2.5 0 0 1-3.451 0 1.12 1.12 0 0 0-1.548 0 2.5 2.5 0 0 1-3.452 0 1.12 1.12 0 0 0-1.549 0 2.5 2.5 0 0 1-3.77-3.248 12.889-4.184A2 2 0 0 1 7 2h10a2 2 0 0 1 1.653.873 12.895 4.192a2.5 2.5 0 0 1-3.774 3.244"></path>
+    <path d="M4 10.95V19a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8.05"></path>
   </svg>`;
   
   console.log('🏷️ Show logo:', showLogo, 'printLogo setting:', storeSettings.printLogo);
